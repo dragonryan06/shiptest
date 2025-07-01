@@ -1,0 +1,20 @@
+[gd_resource type="TileSet" load_steps=5 format=3 uid="uid://d1sjrmo2d0p78"]
+
+[ext_resource type="Texture2D" uid="uid://dnhtsn4n7kvaa" path="res://Resources/Textures/lattice.png" id="1_ivfg0"]
+[ext_resource type="Texture2D" uid="uid://p80n5oafleis" path="res://Resources/Textures/plating.png" id="2_s2f50"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ivfg0"]
+texture = ExtResource("1_ivfg0")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s2f50"]
+texture = ExtResource("2_s2f50")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_ivfg0")
+sources/1 = SubResource("TileSetAtlasSource_s2f50")
