@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 using ShipTest.Globals;
 
@@ -59,6 +58,19 @@ public partial class GridBody : RigidBody2D
             {
                 body.ApplyCentralImpulse(-collision.GetNormal()*new Vector2(80,80));
             }
+        }
+    }
+
+    public override void _Draw()
+    {
+        if (DebugOptions.GetInstance().IsSet(DebugOptions.Flags.CenterOfMass))
+        {
+            DrawCircle(Position, 5f, new Color("#ff0000"));
+        }
+
+        if (DebugOptions.GetInstance().IsSet(DebugOptions.Flags.MovementVectors))
+        {
+            DrawLine(Position, LinearVelocity, new Color("#0000ff"), 1f);
         }
     }
 
