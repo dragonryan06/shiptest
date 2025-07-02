@@ -58,7 +58,7 @@ public partial class GridBody : RigidBody2D
 
         DebugDraw.Instance.Add(
             new DebugLine(
-                ToGlobal(CenterOfMass), ToGlobal(CenterOfMass + LinearVelocity), 
+                ToGlobal(CenterOfMass), ToGlobal(CenterOfMass) + LinearVelocity, 
                 new Color("#0000ff"), 
                 DebugLayerFlags.Physics, 
                 1f));
@@ -104,7 +104,11 @@ public partial class GridBody : RigidBody2D
     {
         var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
         CenterOfMassMode = CenterOfMassModeEnum.Custom;
-        CenterOfMass = tileMap.MapToLocal(tileMap.GetUsedRect().GetCenter()) - new Vector2(0.5f, 0.5f) * tileMap.TileSet.TileSize;
+
+        var usedRect = tileMap.GetUsedRect();
+        CenterOfMass = new Rect2(
+            tileMap.MapToLocal(usedRect.Position) - new Vector2(0.75f, 0.75f) * tileMap.TileSet.TileSize, 
+            tileMap.MapToLocal(usedRect.Size)).GetCenter();
     }
 
     private void GenerateCollisions()

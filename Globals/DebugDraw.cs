@@ -12,7 +12,6 @@ public partial class DebugDraw : Node2D
 
     public static DebugDraw Instance { get; private set; }
 
-
     public DebugLayerFlags LayerState = DebugLayerFlags.Disabled;
 
     public void Add(IDebugDrawing drawing)
