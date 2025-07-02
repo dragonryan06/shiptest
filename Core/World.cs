@@ -6,7 +6,7 @@ public partial class World : Node2D
 {
     public override void _Ready()
     {
-        DebugOptions.GetInstance().SetFlag(DebugOptions.Flags.CenterOfMass);
-        DebugOptions.GetInstance().SetFlag(DebugOptions.Flags.MovementVectors);
+        DebugDraw.Instance.LayerState |= DebugLayerFlags.General;
+        DebugDraw.Instance.LayerState |= DebugLayerFlags.Physics;
     }
 }

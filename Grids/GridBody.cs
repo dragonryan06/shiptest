@@ -23,8 +23,7 @@ public partial class GridBody : RigidBody2D
 
         InitializeChunks();
 
-        // We do this so the RigidBody center is in the center of the tilemap.
-        RecenterTilemap();
+        SetCenterOfMass();
 
         GenerateCollisions();
 
@@ -49,6 +48,22 @@ public partial class GridBody : RigidBody2D
         }
     }
 
+    public override void _Process(double delta)
+    {
+        DebugDraw.Instance.Add(
+            new DebugPoint(
+                ToGlobal(CenterOfMass), new Color("#ff0000"), 
+                DebugLayerFlags.Physics, 
+                5f));
+
+        DebugDraw.Instance.Add(
+            new DebugLine(
+                ToGlobal(CenterOfMass), ToGlobal(CenterOfMass + LinearVelocity), 
+                new Color("#0000ff"), 
+                DebugLayerFlags.Physics, 
+                1f));
+    }
+
     public override void _PhysicsProcess(double delta)
     {
         if (_mouseDrag)
@@ -58,19 +73,6 @@ public partial class GridBody : RigidBody2D
             {
                 body.ApplyCentralImpulse(-collision.GetNormal()*new Vector2(80,80));
             }
-        }
-    }
-
-    public override void _Draw()
-    {
-        if (DebugOptions.GetInstance().IsSet(DebugOptions.Flags.CenterOfMass))
-        {
-            DrawCircle(Position, 5f, new Color("#ff0000"));
-        }
-
-        if (DebugOptions.GetInstance().IsSet(DebugOptions.Flags.MovementVectors))
-        {
-            DrawLine(Position, LinearVelocity, new Color("#0000ff"), 1f);
         }
     }
 
@@ -98,11 +100,11 @@ public partial class GridBody : RigidBody2D
         }
     }
 
-    private void RecenterTilemap()
+    private void SetCenterOfMass()
     {
         var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
-
-        tileMap.Position -= tileMap.GetUsedRect().End / new Vector2(2, 2);
+        CenterOfMassMode = CenterOfMassModeEnum.Custom;
+        CenterOfMass = tileMap.MapToLocal(tileMap.GetUsedRect().GetCenter()) - new Vector2(0.5f, 0.5f) * tileMap.TileSet.TileSize;
     }
 
     private void GenerateCollisions()
