@@ -1,10 +1,21 @@
-[gd_scene load_steps=6 format=4 uid="uid://cnp4pn6ddccft"]
+[gd_scene load_steps=10 format=4 uid="uid://cnp4pn6ddccft"]
 
 [ext_resource type="Script" uid="uid://cgppi0bt3h8v0" path="res://Core/World.cs" id="1_pmidl"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_7h14u"]
 [ext_resource type="PackedScene" uid="uid://dw37jw7kh0vyp" path="res://Resources/Scenes/test_grid_object.tscn" id="3_5o0xi"]
 [ext_resource type="Script" uid="uid://ctnv3mwjqcj8y" path="res://Grids/GridBody.cs" id="4_ye1hu"]
 [ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="5_cq0i2"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ye1hu"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_cq0i2"]
+normal = Vector2(0, 1)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_hddtm"]
+normal = Vector2(-1, 0)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_xapce"]
+normal = Vector2(1, 0)
 
 [node name="World" type="Node2D"]
 script = ExtResource("1_pmidl")
@@ -31,3 +42,31 @@ script = ExtResource("4_ye1hu")
 [node name="Floor" type="TileMapLayer" parent="BigGridObject"]
 tile_map_data = PackedByteArray("AAAAAAAAAQAAAAAAAAABAAEAAQAAAAAAAAABAAAAAQAAAAAAAAACAAAAAQAAAAAAAAADAAAAAQAAAAAAAAACAAEAAQAAAAAAAAAAAAEAAQAAAAAAAAD//wEAAQAAAAAAAAD//wAAAQAAAAAAAAD/////AQAAAAAAAAD+////AQAAAAAAAAD+/wAAAQAAAAAAAAD+/wEAAQAAAAAAAAADAAEAAQAAAAAAAAACAP//AQAAAAAAAAABAP//AQAAAAAAAAAAAP//AQAAAAAAAAD9/wAAAQAAAAAAAAD9/wEAAQAAAAAAAAD9/wIAAQAAAAAAAAD9/wMAAQAAAAAAAAD+/wMAAQAAAAAAAAD+/wIAAQAAAAAAAAD//wIAAQAAAAAAAAAAAAIAAQAAAAAAAAABAAIAAQAAAAAAAAACAAIAAQAAAAAAAAADAAIAAQAAAAAAAAADAAMAAQAAAAAAAAACAAMAAQAAAAAAAAABAAMAAQAAAAAAAAAAAAMAAQAAAAAAAAD//wMAAQAAAAAAAAD+/wQAAQAAAAAAAAD//wQAAQAAAAAAAAAAAAQAAQAAAAAAAAABAAQAAQAAAAAAAAACAAQAAQAAAAAAAAA=")
 tile_set = ExtResource("5_cq0i2")
+
+[node name="WorldBoundaries" type="Node" parent="."]
+
+[node name="WorldBoundary_South" type="StaticBody2D" parent="WorldBoundaries"]
+position = Vector2(0, 326)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/WorldBoundary_South"]
+shape = SubResource("WorldBoundaryShape2D_ye1hu")
+
+[node name="WorldBoundary_North" type="StaticBody2D" parent="WorldBoundaries"]
+position = Vector2(0, -326)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/WorldBoundary_North"]
+shape = SubResource("WorldBoundaryShape2D_cq0i2")
+
+[node name="WorldBoundary_East" type="StaticBody2D" parent="WorldBoundaries"]
+position = Vector2(576, -1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/WorldBoundary_East"]
+position = Vector2(1, 1)
+shape = SubResource("WorldBoundaryShape2D_hddtm")
+
+[node name="WorldBoundary_West" type="StaticBody2D" parent="WorldBoundaries"]
+position = Vector2(-578, -1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/WorldBoundary_West"]
+position = Vector2(1, 1)
+shape = SubResource("WorldBoundaryShape2D_xapce")
