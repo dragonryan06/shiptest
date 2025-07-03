@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Godot;
-using ShipTest.Core;
+using ShipTest.Core.Ecs;
 using ShipTest.Explosive;
 using ShipTest.Globals;
 
 namespace ShipTest.Grids;
 
-[Entity]
-public partial class GridBody : RigidBody2D
+public partial class GridBody : RigidBody2D, IEntity
 {
     private const int ChunkSize = 16;
 
@@ -16,6 +15,11 @@ public partial class GridBody : RigidBody2D
     private bool _mouseDrag;
 
     public Dictionary<Vector2I, GridChunk> Chunks { get; } = new();
+
+    public List<T> GetComponents<T>()
+    {
+        throw new NotImplementedException();
+    }
 
     public override void _Ready()
     {
@@ -65,13 +69,13 @@ public partial class GridBody : RigidBody2D
                 {
                     GetNode<ExplosionComponent>("ExplosionComponent").StartExplosion(
                         GetNode<TileMapLayer>(nameof(LayerNames.Floor)).LocalToMap(GetLocalMousePosition()),
-                        100);
+                        10);
                 }
                 else
                 {
                     AddChild(new ExplosionComponent(
                         GetNode<TileMapLayer>(nameof(LayerNames.Floor)).LocalToMap(GetLocalMousePosition()),
-                            100));
+                            10));
                 }
 
                 break;

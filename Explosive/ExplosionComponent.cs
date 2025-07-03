@@ -2,18 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using ShipTest.Core;
+using ShipTest.Core.Ecs;
 using ShipTest.Globals;
 
 namespace ShipTest.Explosive;
 
 // Handles and draws all explosions occurring on the parent Entity.
-[Component]
-public partial class ExplosionComponent : TileMapLayer
+public partial class ExplosionComponent : TileMapLayer, IComponent
 {
     private static readonly TileSet ExplosionTiles = GD.Load<TileSet>("res://Resources/Tilesets/explosion.tres");
     private static readonly Vector2I RandomTileRange = new(7, 6);
-
 
     private readonly Timer _explosionTicker = new()
     {
@@ -33,6 +31,11 @@ public partial class ExplosionComponent : TileMapLayer
 
         _explosionTicker.Timeout += ExplosionTicker_Timeout;
         AddChild(_explosionTicker);
+    }
+
+    public T GetEntity<T>() where T : class
+    {
+        return GetParentOrNull<T>() ?? throw new EcsException($"Component {nameof(ExplosionComponent)} has no parent Entity!");
     }
 
     public override void _Ready()
