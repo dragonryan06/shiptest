@@ -25,7 +25,15 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     // IDestructible
     public void DestroyCell(Vector2I cell)
     {
-        GetNode<TileMapLayer>(nameof(LayerNames.Floor)).SetCell(cell);
+        var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
+        if (tileMap.GetCellSourceId(cell) != -1)
+        {
+            tileMap.EraseCell(cell);
+            SetCenterOfMass();
+
+            var chunkPos = TileToChunkPos(cell);
+            GetNode<GridChunk>($"Chunk{chunkPos.X}_{chunkPos.Y}").GenerateCollisions(tileMap);
+        }
     }
 
     public override void _Ready()

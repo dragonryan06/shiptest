@@ -20,6 +20,7 @@ public partial class GridChunk(Rect2I bounds, Vector2I tileSize) : CollisionPoly
         if (polygons.Count == 0)
         {
             GD.PushError($"No polygon generated for grid chunk {Name}!");
+            Polygon = null;
             return;
         }
 

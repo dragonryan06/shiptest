@@ -98,7 +98,7 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
                     nextCellPressures.TryAdd(cell, 0);
                     break;
                 default:
-                    SetCell(cell);
+                    EraseCell(cell);
                     break;
             }
         }
