@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using ShipTest.Core.Ecs;
-using ShipTest.Explosive;
+using ShipTest.Destruction;
 using ShipTest.Globals;
 
 namespace ShipTest.Grids;
 
-public partial class GridBody : RigidBody2D, IEntity
+public partial class GridBody : RigidBody2D, IEntity, IDestructible
 {
     private const int ChunkSize = 16;
 
@@ -16,9 +16,16 @@ public partial class GridBody : RigidBody2D, IEntity
 
     public Dictionary<Vector2I, GridChunk> Chunks { get; } = new();
 
-    public List<T> GetComponents<T>()
+    // IEntity
+    public List<T> GetComponents<T>() where T : class
     {
         throw new NotImplementedException();
+    }
+
+    // IDestructible
+    public void DestroyCell(Vector2I cell)
+    {
+        GetNode<TileMapLayer>(nameof(LayerNames.Floor)).SetCell(cell);
     }
 
     public override void _Ready()
@@ -65,17 +72,17 @@ public partial class GridBody : RigidBody2D, IEntity
 
             case MouseButton.Right when _mouseHover && mouseButton.IsPressed():
 
-                if (HasNode("ExplosionComponent")) // TODO: maybe an Entity.HasComp(Component) would be cool? or maybe something that injects the component if it isn't present.
+                if (HasNode("ExplosionComponent")) // TODO: maybe an IEntity.HasComp(Component) would be cool? or maybe something that injects the component if it isn't present.
                 {
                     GetNode<ExplosionComponent>("ExplosionComponent").StartExplosion(
                         GetNode<TileMapLayer>(nameof(LayerNames.Floor)).LocalToMap(GetLocalMousePosition()),
-                        10);
+                        50);
                 }
                 else
                 {
                     AddChild(new ExplosionComponent(
                         GetNode<TileMapLayer>(nameof(LayerNames.Floor)).LocalToMap(GetLocalMousePosition()),
-                            10));
+                            50));
                 }
 
                 break;

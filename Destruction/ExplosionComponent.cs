@@ -5,7 +5,7 @@ using Godot;
 using ShipTest.Core.Ecs;
 using ShipTest.Globals;
 
-namespace ShipTest.Explosive;
+namespace ShipTest.Destruction;
 
 // Handles and draws all explosions occurring on the parent Entity.
 public partial class ExplosionComponent : TileMapLayer, IComponent
@@ -33,6 +33,7 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
         AddChild(_explosionTicker);
     }
 
+    // IComponent
     public T GetEntity<T>() where T : class
     {
         return GetParentOrNull<T>() ?? throw new EcsException($"Component {nameof(ExplosionComponent)} has no parent Entity!");
@@ -78,18 +79,27 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
 
         foreach (var cell in GetUsedCells())
         {
-            if (_cellPressures[cell] > 1)
+            var lastPressure = _cellPressures[cell];
+
+            if (lastPressure > 5)
             {
-                var localPressure = SpreadPressure(cell);
-                nextCellPressures.TryAdd(cell, localPressure);
+                GetEntity<IDestructible>().DestroyCell(cell);
             }
-            else if (_cellPressures[cell] == 1)
+
+            switch (lastPressure)
             {
-                nextCellPressures.TryAdd(cell, 0);
-            }
-            else
-            {
-                SetCell(cell);
+                case > 1:
+                {
+                    var newPressure = SpreadPressure(cell);
+                    nextCellPressures.TryAdd(cell, newPressure);
+                    break;
+                }
+                case 1:
+                    nextCellPressures.TryAdd(cell, 0);
+                    break;
+                default:
+                    SetCell(cell);
+                    break;
             }
         }
 
