@@ -5,23 +5,26 @@ using ShipTest.Globals;
 
 namespace ShipTest.Grids;
 
-public partial class GridChunk(Rect2I bounds, Vector2I tileSize) : CollisionPolygon2D
+public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 {
     public Rect2I Bounds { get; } = bounds;
 
     public Rect2I PixelBounds { get; } = new(bounds.Position * tileSize, bounds.Size * tileSize);
 
+    public List<GridFixture> Fixtures { get; private set; } = [];
+
+    public string Name { get; } = name;
+
     // https://gist.github.com/afk-mario/15b5855ccce145516d1b458acfe29a28
-    public void GenerateCollisions(TileMapLayer tileMap)
+    public List<GridFixture> GenerateCollisions(TileMapLayer tileMap)
     {
         List<Vector2[]> polygons = [];
         polygons.AddRange(tileMap.GetUsedCells().Where(cell => Bounds.HasPoint(cell)).Select(GetCellPolygon));
 
         if (polygons.Count == 0)
         {
-            GD.PushError($"No polygon generated for grid chunk {Name}!");
-            Polygon = null;
-            return;
+            GD.PushError($"No polygon generated for {Name}!");
+            return [];
         }
 
         List<Vector2[]> deletingPolygons;
@@ -44,16 +47,9 @@ public partial class GridChunk(Rect2I bounds, Vector2I tileSize) : CollisionPoly
 
         } while (deletingPolygons.Count != 0);
 
-        if (polygons.Count > 1)
-        {
-            GD.PushWarning($"Grid chunk {Name} generated multiple polygons! Just taking the first for now. (implement fixture system pls)");
-        }
-
-        Polygon = polygons[0];
-
         tileMap.CollisionVisibilityMode = TileMapLayer.DebugVisibilityMode.ForceHide;
 
-        return;
+        return CreateFixtures();
 
         Vector2[] GetCellPolygon(Vector2I cell)
         {
@@ -89,6 +85,21 @@ public partial class GridChunk(Rect2I bounds, Vector2I tileSize) : CollisionPoly
 
                 deletingPolygons.Add(polygons[idx]);
             }
+        }
+
+        List<GridFixture> CreateFixtures()
+        {
+            List<GridFixture> fixtures = [];
+
+            for (var i = 0; i < polygons.Count; i++)
+            {
+                var f = new GridFixture();
+                f.Name = $"{Name}_Fixture{i}";
+                f.Polygon = polygons[i];
+                fixtures.Add(f);
+            }
+
+            return Fixtures = fixtures;
         }
     }
 }

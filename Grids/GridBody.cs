@@ -31,8 +31,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             tileMap.EraseCell(cell);
             SetCenterOfMass();
 
-            var chunkPos = TileToChunkPos(cell);
-            GetNode<GridChunk>($"Chunk{chunkPos.X}_{chunkPos.Y}").GenerateCollisions(tileMap);
+            GenerateChunkCollisions(Chunks[TileToChunkPos(cell)]);
         }
     }
 
@@ -47,7 +46,10 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 
         SetCenterOfMass();
 
-        GenerateCollisions();
+        foreach (var chunk in Chunks.Values)
+        {
+            GenerateChunkCollisions(chunk);
+        }
 
         MouseEntered += OnMouseEntered;
         MouseExited += OnMouseExited;
@@ -84,13 +86,13 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                 {
                     GetNode<ExplosionComponent>("ExplosionComponent").StartExplosion(
                         GetNode<TileMapLayer>(nameof(LayerNames.Floor)).LocalToMap(GetLocalMousePosition()),
-                        50);
+                        25);
                 }
                 else
                 {
                     AddChild(new ExplosionComponent(
                         GetNode<TileMapLayer>(nameof(LayerNames.Floor)).LocalToMap(GetLocalMousePosition()),
-                            50));
+                            25));
                 }
 
                 break;
@@ -141,10 +143,10 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             for (var x = TileToChunkPos(usedRect.Position).X; x < TileToChunkPos(usedRect.Size).X + 1; x++)
             {
                 var chunk = new GridChunk(
+                    $"GridChunk({x}, {y})",
                     new Rect2I(x * ChunkSize, y * ChunkSize, ChunkSize, ChunkSize),
                     tileMap.TileSet.TileSize);
-                chunk.Name = $"Chunk{x}_{y}";
-                Chunks.Add(chunk.Bounds.Position, chunk);
+                Chunks.Add(new Vector2I(x, y), chunk);
             }
         }
     }
@@ -160,13 +162,18 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             tileMap.MapToLocal(usedRect.Size)).GetCenter();
     }
 
-    private void GenerateCollisions()
+    private void GenerateChunkCollisions(GridChunk chunk)
     {
-        foreach (var chunk in Chunks.Values)
+        foreach (var fixture in chunk.Fixtures)
         {
-            chunk.GenerateCollisions(GetNode<TileMapLayer>(nameof(LayerNames.Floor)));
-            AddChild(chunk);
+            RemoveChild(fixture);
+            fixture.QueueFree();
         }
+
+        chunk.Fixtures.Clear();
+
+        var fixtures = chunk.GenerateCollisions(GetNode<TileMapLayer>(nameof(LayerNames.Floor)));
+        fixtures.ForEach(f => AddChild(f));
     }
 
     private void OnMouseEntered()
