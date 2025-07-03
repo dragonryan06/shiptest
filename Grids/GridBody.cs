@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using ShipTest.Core;
+using ShipTest.Explosive;
 using ShipTest.Globals;
 
 namespace ShipTest.Grids;
 
+[Entity]
 public partial class GridBody : RigidBody2D
 {
     private const int ChunkSize = 16;
@@ -33,18 +36,45 @@ public partial class GridBody : RigidBody2D
 
     public override void _Input(InputEvent @event)
     {
-        if (@event is InputEventMouseButton mouseButton && mouseButton.ButtonIndex == MouseButton.Left)
+        if (@event is not InputEventMouseButton mouseButton)
         {
-            if (_mouseHover && mouseButton.IsPressed())
-            {
-                _mouseDrag = true;
-                Freeze = true;
-            } else if (_mouseDrag)
-            {
-                _mouseDrag = false;
-                Freeze = false;
-                ApplyCentralImpulse(Input.GetLastMouseVelocity());
-            }
+            return;
+        }
+
+        switch (mouseButton.ButtonIndex)
+        {
+            case MouseButton.Left:
+
+                if (_mouseHover && mouseButton.IsPressed())
+                {
+                    _mouseDrag = true;
+                    Freeze = true;
+                }
+                else if (_mouseDrag)
+                {
+                    _mouseDrag = false;
+                    Freeze = false;
+                    ApplyCentralImpulse(Input.GetLastMouseVelocity());
+                }
+
+                break;
+
+            case MouseButton.Right when _mouseHover && mouseButton.IsPressed():
+
+                if (HasNode("ExplosionComponent")) // TODO: maybe an Entity.HasComp(Component) would be cool? or maybe something that injects the component if it isn't present.
+                {
+                    GetNode<ExplosionComponent>("ExplosionComponent").StartExplosion(
+                        GetNode<TileMapLayer>(nameof(LayerNames.Floor)).LocalToMap(GetLocalMousePosition()),
+                        100);
+                }
+                else
+                {
+                    AddChild(new ExplosionComponent(
+                        GetNode<TileMapLayer>(nameof(LayerNames.Floor)).LocalToMap(GetLocalMousePosition()),
+                            100));
+                }
+
+                break;
         }
     }
 

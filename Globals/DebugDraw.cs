@@ -9,6 +9,9 @@ public partial class DebugDraw : Node2D
 {
     private readonly List<DebugPoint> _points = [];
     private readonly List<DebugLine> _lines = [];
+    private readonly List<DebugText> _text = [];
+
+    private static Font _defaultFont;
 
     public static DebugDraw Instance { get; private set; }
 
@@ -24,6 +27,9 @@ public partial class DebugDraw : Node2D
             case DebugLine line:
                 _lines.Add(line);
                 break;
+            case DebugText text:
+                _text.Add(text);
+                break;
             default:
                 throw new ArgumentException("Bro, you can't just make up your own shape like that.");
         }
@@ -34,6 +40,7 @@ public partial class DebugDraw : Node2D
     public override void _Ready()
     {
         ZIndex = 100;
+        _defaultFont = ThemeDB.FallbackFont;
         Instance = this;
     }
 
@@ -58,8 +65,19 @@ public partial class DebugDraw : Node2D
                 line.Width);
         }
 
+        foreach (var text in _text.Where(text => (LayerState & text.Layer) != 0))
+        {
+            DrawString(
+                _defaultFont,
+                text.Position,
+                text.Text,
+                modulate: text.Color,
+                fontSize: text.FontSize);
+        }
+
         _points.Clear();
         _lines.Clear();
+        _text.Clear();
     }
 }
 
@@ -99,4 +117,18 @@ public struct DebugLine(
     public Color Color = color;
     public DebugLayerFlags Layer = layer;
     public float Width = width;
+}
+
+public struct DebugText(
+    Vector2 position,
+    Color color,
+    string text,
+    DebugLayerFlags layer = DebugLayerFlags.General,
+    int fontSize = 8) : IDebugDrawing
+{
+    public Vector2 Position = position;
+    public Color Color = color;
+    public string Text = text;
+    public DebugLayerFlags Layer = layer;
+    public int FontSize = fontSize;
 }
