@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -18,7 +19,7 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
     // https://gist.github.com/afk-mario/15b5855ccce145516d1b458acfe29a28
     public List<GridFixture> GenerateCollisions(TileMapLayer tileMap)
     {
-        List<Vector2[]> polygons = [];
+        List<Polygon> polygons = [];
         polygons.AddRange(tileMap.GetUsedCells().Where(cell => Bounds.HasPoint(cell)).Select(GetCellPolygon));
 
         if (polygons.Count == 0)
@@ -27,7 +28,7 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
             return [];
         }
 
-        List<Vector2[]> deletingPolygons;
+        List<Polygon> deletingPolygons;
 
         do
         {
@@ -51,7 +52,7 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 
         return CreateFixtures();
 
-        Vector2[] GetCellPolygon(Vector2I cell)
+        Polygon GetCellPolygon(Vector2I cell)
         {
             var polygon = tileMap.GetCellTileData(cell).GetCollisionPolygonPoints((int)CollisionLayers.Floor, 0);
             var translationResult = new Vector2[polygon.Length];
@@ -62,7 +63,9 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
                 translationResult[i] += tileMap.TileSet.TileSize / 2;
             }
 
-            return translationResult;
+            return new Polygon(
+                translationResult,
+                cell);
         }
 
         void AttemptMergeWithPrecedingPolygons(int idx)
@@ -74,14 +77,14 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
                     continue;
                 }
 
-                var mergeResult = Geometry2D.MergePolygons(polygons[idx], polygons[j]);
+                var mergeResult = Geometry2D.MergePolygons(polygons[idx].Points, polygons[j].Points);
 
                 if (mergeResult.Count > 1)
                 {
                     continue;
                 }
 
-                polygons[j] = mergeResult[0];
+                polygons[j] = new Polygon(mergeResult[0], polygons[j].ReferenceCell);
 
                 deletingPolygons.Add(polygons[idx]);
             }
@@ -93,13 +96,34 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 
             for (var i = 0; i < polygons.Count; i++)
             {
-                var f = new GridFixture();
-                f.Name = $"{Name}_Fixture{i}";
-                f.Polygon = polygons[i];
-                fixtures.Add(f);
+                fixtures.Add(new GridFixture(
+                    $"{Name}_Fixture{i}",
+                    polygons[i].Points,
+                    polygons[i].ReferenceCell));
             }
 
             return Fixtures = fixtures;
+        }
+    }
+
+    private readonly struct Polygon(Vector2[] points, Vector2I referenceCell) : IEquatable<Polygon>
+    {
+        public readonly Vector2[] Points = points;
+        public readonly Vector2I ReferenceCell = referenceCell;
+
+        public bool Equals(Polygon other)
+        {
+            return ReferenceCell.Equals(other.ReferenceCell);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Polygon other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return ReferenceCell.GetHashCode();
         }
     }
 }

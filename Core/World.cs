@@ -8,7 +8,9 @@ public partial class World : Node2D
     {
         // TODO: big problem rn that debug stuff will still be being calculated even if the layer isnt drawing.
         DebugDraw.Instance.LayerState |= DebugLayerFlags.General;
-        DebugDraw.Instance.LayerState |= DebugLayerFlags.Physics;
+        //DebugDraw.Instance.LayerState |= DebugLayerFlags.Physics;
+        //DebugDraw.Instance.LayerState |= DebugLayerFlags.Automata;
+        DebugDraw.Instance.LayerState |= DebugLayerFlags.Grids;
     }
 
     public override void _Process(double delta)

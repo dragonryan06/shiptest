@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using Godot;
 using ShipTest.Core.Ecs;
 using ShipTest.Destruction;
@@ -7,10 +9,14 @@ using ShipTest.Globals;
 
 namespace ShipTest.Grids;
 
+// https://docs.spacestation14.com/en/robust-toolbox/transform/grids.html
+// If this system of doing polygon merging gets too laggy, might be worth it to implement
+// exactly what RobustToolbox does here, with two levels of flood-fill algorithms instead.
 public partial class GridBody : RigidBody2D, IEntity, IDestructible
 {
     private const int ChunkSize = 16;
 
+    private AStarGrid2D _floorAStar = new();
     private bool _mouseHover;
     private bool _mouseDrag;
 
@@ -51,8 +57,13 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             GenerateChunkCollisions(chunk);
         }
 
+        GenerateFloorAStar();
+
+        ConstructFixtureGraph();
+
         MouseEntered += OnMouseEntered;
         MouseExited += OnMouseExited;
+        GetNode<TileMapLayer>(nameof(LayerNames.Floor)).Changed += Floor_Changed;
     }
 
     public override void _Input(InputEvent @event)
@@ -134,6 +145,28 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             (int)Math.Floor(tilePos.Y / (float)ChunkSize));
     }
 
+    public List<GridChunk> GetNeighboringChunksOf(Vector2I chunkPos)
+    {
+        Vector2I[] directions = [Vector2I.Left, Vector2I.Up, Vector2I.Right, Vector2I.Down];
+
+        var neighbors = new List<GridChunk>();
+
+        foreach (var d in directions)
+        {
+            if (Chunks.TryGetValue(chunkPos + d, out var chunk))
+            {
+                neighbors.Add(chunk);
+            }
+        }
+
+        return neighbors;
+    }
+
+    public bool ExistsPathBetween(Vector2I start, Vector2I end)
+    {
+        return !_floorAStar.GetPointPath(start, end).IsEmpty();
+    }
+
     private void InitializeChunks()
     {
         var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
@@ -176,6 +209,41 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         fixtures.ForEach(f => AddChild(f));
     }
 
+    private void GenerateFloorAStar()
+    {
+        var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
+        _floorAStar.Clear();
+        _floorAStar.Region = tileMap.GetUsedRect();
+
+        foreach (var cell in tileMap.GetUsedCells())
+        {
+            _floorAStar.SetPointSolid(cell, false);
+        }
+
+        _floorAStar.Update();
+    }
+
+    private void ConstructFixtureGraph()
+    {
+        foreach (var chunkPos in Chunks.Keys)
+        {
+            foreach (var fixture in Chunks[chunkPos].Fixtures)
+            {
+                foreach (var neighborChunk in GetNeighboringChunksOf(chunkPos))
+                {
+                    foreach (var otherFixture in neighborChunk.Fixtures)
+                    {
+                        if (ExistsPathBetween(fixture.ReferenceCell, otherFixture.ReferenceCell))
+                        {
+                            fixture.Neighbors.Add(otherFixture);
+                            otherFixture.Neighbors.Add(fixture);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void OnMouseEntered()
     {
         _mouseHover = true;
@@ -184,6 +252,11 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     private void OnMouseExited()
     {
         _mouseHover = false;
+    }
+
+    private void Floor_Changed()
+    {
+        CallDeferred(nameof(GenerateFloorAStar));
     }
 }
 

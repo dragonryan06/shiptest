@@ -51,7 +51,8 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
             DebugDraw.Instance.Add(new DebugText(
                 ToGlobal(MapToLocal(cell)) - new Vector2(8,8),
                 new Color("#000000"),
-                _cellPressures[cell].ToString()));
+                _cellPressures[cell].ToString(),
+                DebugLayerFlags.Automata));
         }
     }
 
