@@ -14,6 +14,9 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 
     public List<GridFixture> Fixtures { get; private set; } = [];
 
+    // Dirty chunks have fixtures that need to be checked for disconnection from the larger graph.
+    public bool IsDirty { get; set; } = true;
+
     public string Name { get; } = name;
 
     // https://gist.github.com/afk-mario/15b5855ccce145516d1b458acfe29a28
@@ -49,6 +52,8 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
         } while (deletingPolygons.Count != 0);
 
         tileMap.CollisionVisibilityMode = TileMapLayer.DebugVisibilityMode.ForceHide;
+
+        IsDirty = true;
 
         return CreateFixtures();
 
@@ -99,8 +104,12 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
                 fixtures.Add(new GridFixture(
                     $"{Name}_Fixture{i}",
                     polygons[i].Points,
-                    polygons[i].ReferenceCell));
+                    polygons[i].ReferenceCell,
+                    tileMap.MapToLocal(polygons[i].ReferenceCell)));
             }
+
+            // Need to wipe references to the old fixtures in others' Neighbors properties
+            Fixtures.ForEach(f => f.Dispose());
 
             return Fixtures = fixtures;
         }

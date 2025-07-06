@@ -16,7 +16,6 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 {
     private const int ChunkSize = 16;
 
-    private AStarGrid2D _floorAStar = new();
     private bool _mouseHover;
     private bool _mouseDrag;
 
@@ -29,7 +28,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     }
 
     // IDestructible
-    public void DestroyCell(Vector2I cell)
+    public void DestroyCell(Vector2I cell) // TODO all cell changes need to be piped through common methods eventually cause theres a lot that needs to be updated in every case (most of the time on a CallDeferred basis).
     {
         var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
         if (tileMap.GetCellSourceId(cell) != -1)
@@ -38,6 +37,8 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             SetCenterOfMass();
 
             GenerateChunkCollisions(Chunks[TileToChunkPos(cell)]);
+
+            UpdateFixtureGraph();
         }
     }
 
@@ -57,13 +58,10 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             GenerateChunkCollisions(chunk);
         }
 
-        GenerateFloorAStar();
-
-        ConstructFixtureGraph();
+        UpdateFixtureGraph();
 
         MouseEntered += OnMouseEntered;
         MouseExited += OnMouseExited;
-        GetNode<TileMapLayer>(nameof(LayerNames.Floor)).Changed += Floor_Changed;
     }
 
     public override void _Input(InputEvent @event)
@@ -162,11 +160,6 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         return neighbors;
     }
 
-    public bool ExistsPathBetween(Vector2I start, Vector2I end)
-    {
-        return !_floorAStar.GetPointPath(start, end).IsEmpty();
-    }
-
     private void InitializeChunks()
     {
         var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
@@ -209,31 +202,30 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         fixtures.ForEach(f => AddChild(f));
     }
 
-    private void GenerateFloorAStar()
+    private void UpdateFixtureGraph()
     {
         var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
-        _floorAStar.Clear();
-        _floorAStar.Region = tileMap.GetUsedRect();
+        var aStarGrid = new AStarGrid2D();
 
-        foreach (var cell in tileMap.GetUsedCells())
-        {
-            _floorAStar.SetPointSolid(cell, false);
-        }
-
-        _floorAStar.Update();
-    }
-
-    private void ConstructFixtureGraph()
-    {
-        foreach (var chunkPos in Chunks.Keys)
+        foreach (var chunkPos in Chunks.Keys.Where(k => Chunks[k].IsDirty))
         {
             foreach (var fixture in Chunks[chunkPos].Fixtures)
             {
                 foreach (var neighborChunk in GetNeighboringChunksOf(chunkPos))
                 {
+                    aStarGrid.Region = Chunks[chunkPos].Bounds.Merge(neighborChunk.Bounds);
+                    aStarGrid.Update();
+
+                    aStarGrid.FillSolidRegion(aStarGrid.Region);
+
+                    foreach (var cell in tileMap.GetUsedCells().Where(c => aStarGrid.Region.HasPoint(c)))
+                    {
+                        aStarGrid.SetPointSolid(cell, false);
+                    }
+
                     foreach (var otherFixture in neighborChunk.Fixtures)
                     {
-                        if (ExistsPathBetween(fixture.ReferenceCell, otherFixture.ReferenceCell))
+                        if (aStarGrid.GetIdPath(fixture.ReferenceCell, otherFixture.ReferenceCell).Count != 0)
                         {
                             fixture.Neighbors.Add(otherFixture);
                             otherFixture.Neighbors.Add(fixture);
@@ -241,6 +233,8 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                     }
                 }
             }
+
+            Chunks[chunkPos].IsDirty = false;
         }
     }
 
@@ -252,11 +246,6 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     private void OnMouseExited()
     {
         _mouseHover = false;
-    }
-
-    private void Floor_Changed()
-    {
-        CallDeferred(nameof(GenerateFloorAStar));
     }
 }
 
