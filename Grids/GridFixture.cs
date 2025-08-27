@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
+using ShipTest.Core.Graphs;
 using ShipTest.Globals;
 
 namespace ShipTest.Grids;
 
-public partial class GridFixture : CollisionPolygon2D
+public partial class GridFixture : CollisionPolygon2D, IGraphNode
 {
     private bool _disposed;
     private Vector2 _referenceCellGlobalPos;
@@ -12,45 +14,65 @@ public partial class GridFixture : CollisionPolygon2D
     public GridFixture(
         string name, 
         Vector2[] polygon, 
-        Vector2I referenceCell, 
+        List<Vector2I> containedCells, 
         Vector2 referenceCellGlobalPos)
     {
         Name = name;
         Polygon = polygon;
-        ReferenceCell = referenceCell;
+        ContainedCells = containedCells;
         ReferenceCellGlobalPos = referenceCellGlobalPos;
     }
 
+    public GridFixture()
+    {
+        Name = "UninitializedFixture";
+    }
+
+    // IGraphNode
     // All neighbors must be on other chunks, otherwise they'd be a part of this fixture.
-    public List<GridFixture> Neighbors { get; set; } = [];
-
+    public List<IGraphNode> Neighbors { get; set; } = [];
+    
+    public bool Visited { get; set; }
+    
+    public List<Vector2I> ContainedCells { get; }
+    
     // An example position inside this fixture for testing connection.
-    public Vector2I ReferenceCell { get; set; }
+    public Vector2I ReferenceCell => ContainedCells[0];
 
-    // For debug drawing
+    // For debug drawing, should be this.ToGlobal(TileMap.MapToLocal(ContainedCells[0]))
     public Vector2 ReferenceCellGlobalPos
     {
         get => ToGlobal(_referenceCellGlobalPos);
         set => _referenceCellGlobalPos = value;
     }
 
-    // Used for debug drawing and stuff (Warning! pretty expensive! probably want to disable debug calls to this when they're not visible)
-    //public Vector2 Center
-    //{
-    //    get
-    //    {
-    //        var c = Vector2.Zero;
+    public List<IGraphNode> DetermineNeighbors()
+    {
+        var parentBody = (GridBody)GetParent();
+        var aStarGrid = new AStarGrid2D();
+        var chunkPos = GridBody.TileToChunkPos(ReferenceCell);
+        
+        var result = new List<IGraphNode>();
+        
+        foreach (var neighborChunk in parentBody.GetNeighboringChunksOf(chunkPos))
+        {
+            aStarGrid.Region = parentBody.Chunks[chunkPos].Bounds.Merge(neighborChunk.Bounds);
+            aStarGrid.DiagonalMode = AStarGrid2D.DiagonalModeEnum.Never;
+            aStarGrid.Update();
 
-    //        foreach (var p in Polygon)
-    //        {
-    //            c += ToGlobal(p);
-    //        }
+            aStarGrid.FillSolidRegion(aStarGrid.Region);
 
-    //        c /= Polygon.Length;
+            foreach (var cell in parentBody.GetNode<TileMapLayer>(nameof(LayerNames.Floor))
+                         .GetUsedCells().Where(c => aStarGrid.Region.HasPoint(c)))
+            {
+                aStarGrid.SetPointSolid(cell, false);
+            }
 
-    //        return c;
-    //    }
-    //}
+            result.AddRange(neighborChunk.Fixtures.Where(otherFixture => aStarGrid.GetIdPath(ReferenceCell, otherFixture.ReferenceCell).Count != 0));
+        }
+
+        return result;
+    }
 
     public override void _Process(double delta)
     {
@@ -62,10 +84,11 @@ public partial class GridFixture : CollisionPolygon2D
 
         foreach (var n in Neighbors)
         {
+            var other = (GridFixture)n;
             // all the lines will be doubled this way but idc
             DebugDraw.Instance.Add(new DebugLine(
                 ReferenceCellGlobalPos,
-                n.ReferenceCellGlobalPos,
+                other.ReferenceCellGlobalPos,
                 new Color("#ffff00"),
                 DebugLayerFlags.Grids));
         }

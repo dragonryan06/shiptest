@@ -14,7 +14,8 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 
     public List<GridFixture> Fixtures { get; private set; } = [];
 
-    // Dirty chunks have fixtures that need to be checked for disconnection from the larger graph.
+    // When a chunk is dirty, later in the frame each fixture in it will try to pathfind to its neighbors
+    // to make sure they're still neighboring.
     public bool IsDirty { get; set; } = true;
 
     public string Name { get; } = name;
@@ -70,7 +71,7 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 
             return new Polygon(
                 translationResult,
-                cell);
+                [cell]);
         }
 
         void AttemptMergeWithPrecedingPolygons(int idx)
@@ -88,8 +89,9 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
                 {
                     continue;
                 }
-
-                polygons[j] = new Polygon(mergeResult[0], polygons[j].ReferenceCell);
+                
+                polygons[j].ContainedCells.AddRange(polygons[idx].ContainedCells);
+                polygons[j] = new Polygon(mergeResult[0], polygons[j].ContainedCells);
 
                 deletingPolygons.Add(polygons[idx]);
             }
@@ -104,8 +106,8 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
                 fixtures.Add(new GridFixture(
                     $"{Name}_Fixture{i}",
                     polygons[i].Points,
-                    polygons[i].ReferenceCell,
-                    tileMap.MapToLocal(polygons[i].ReferenceCell)));
+                    polygons[i].ContainedCells,
+                    tileMap.MapToLocal(polygons[i].ContainedCells[0])));
             }
 
             // Need to wipe references to the old fixtures in others' Neighbors properties
@@ -115,14 +117,14 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
         }
     }
 
-    private readonly struct Polygon(Vector2[] points, Vector2I referenceCell) : IEquatable<Polygon>
+    private readonly struct Polygon(Vector2[] points, List<Vector2I> containedCells) : IEquatable<Polygon>
     {
         public readonly Vector2[] Points = points;
-        public readonly Vector2I ReferenceCell = referenceCell;
+        public readonly List<Vector2I> ContainedCells = containedCells;
 
         public bool Equals(Polygon other)
         {
-            return ReferenceCell.Equals(other.ReferenceCell);
+            return ContainedCells.Equals(other.ContainedCells);
         }
 
         public override bool Equals(object obj)
@@ -132,7 +134,7 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 
         public override int GetHashCode()
         {
-            return ReferenceCell.GetHashCode();
+            return ContainedCells.GetHashCode();
         }
     }
 }

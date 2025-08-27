@@ -1,10 +1,11 @@
-[gd_scene load_steps=10 format=4 uid="uid://cnp4pn6ddccft"]
+[gd_scene load_steps=11 format=4 uid="uid://cnp4pn6ddccft"]
 
 [ext_resource type="Script" uid="uid://cgppi0bt3h8v0" path="res://Core/World.cs" id="1_pmidl"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_7h14u"]
 [ext_resource type="PackedScene" uid="uid://dw37jw7kh0vyp" path="res://Resources/Scenes/test_grid_object.tscn" id="3_5o0xi"]
 [ext_resource type="Script" uid="uid://ctnv3mwjqcj8y" path="res://Grids/GridBody.cs" id="4_ye1hu"]
 [ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="5_cq0i2"]
+[ext_resource type="PackedScene" uid="uid://dq17chvc36u4q" path="res://Resources/Scenes/chunk_splitting_tester.tscn" id="6_cq0i2"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ye1hu"]
 
@@ -29,19 +30,22 @@ color = Color(1, 1, 1, 0)
 script = ExtResource("2_7h14u")
 
 [node name="TestGridObject" parent="." instance=ExtResource("3_5o0xi")]
-position = Vector2(24, -40)
+position = Vector2(-559, -209)
 
 [node name="TestGridObject2" parent="." instance=ExtResource("3_5o0xi")]
-position = Vector2(-174, -102)
+position = Vector2(-561, -316)
 
 [node name="BigGridObject" type="RigidBody2D" parent="."]
-position = Vector2(-245, 141)
+position = Vector2(-470, 160)
 input_pickable = true
 script = ExtResource("4_ye1hu")
 
 [node name="Floor" type="TileMapLayer" parent="BigGridObject"]
 tile_map_data = PackedByteArray("AAAAAAAAAQAAAAAAAAABAAEAAQAAAAAAAAABAAAAAQAAAAAAAAACAAAAAQAAAAAAAAADAAAAAQAAAAAAAAACAAEAAQAAAAAAAAAAAAEAAQAAAAAAAAD//wEAAQAAAAAAAAD//wAAAQAAAAAAAAD/////AQAAAAAAAAD+////AQAAAAAAAAD+/wAAAQAAAAAAAAD+/wEAAQAAAAAAAAADAAEAAQAAAAAAAAACAP//AQAAAAAAAAABAP//AQAAAAAAAAAAAP//AQAAAAAAAAD9/wAAAQAAAAAAAAD9/wEAAQAAAAAAAAD9/wIAAQAAAAAAAAD9/wMAAQAAAAAAAAD+/wMAAQAAAAAAAAD+/wIAAQAAAAAAAAD//wIAAQAAAAAAAAAAAAIAAQAAAAAAAAABAAIAAQAAAAAAAAACAAIAAQAAAAAAAAADAAIAAQAAAAAAAAADAAMAAQAAAAAAAAACAAMAAQAAAAAAAAABAAMAAQAAAAAAAAAAAAMAAQAAAAAAAAD//wMAAQAAAAAAAAD+/wQAAQAAAAAAAAD//wQAAQAAAAAAAAAAAAQAAQAAAAAAAAABAAQAAQAAAAAAAAACAAQAAQAAAAAAAAA=")
 tile_set = ExtResource("5_cq0i2")
+
+[node name="ChunkSplittingTester" parent="." instance=ExtResource("6_cq0i2")]
+position = Vector2(34, -48)
 
 [node name="WorldBoundaries" type="Node" parent="."]
 

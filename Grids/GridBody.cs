@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Godot;
 using ShipTest.Core.Ecs;
+using ShipTest.Core.Graphs;
 using ShipTest.Destruction;
 using ShipTest.Globals;
 
@@ -20,6 +20,8 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     private bool _mouseDrag;
 
     public Dictionary<Vector2I, GridChunk> Chunks { get; } = new();
+
+    public Graph<GridFixture> FixtureGraph { get; } = new();
 
     // IEntity
     public List<T> GetComponents<T>() where T : class
@@ -199,42 +201,63 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         chunk.Fixtures.Clear();
 
         var fixtures = chunk.GenerateCollisions(GetNode<TileMapLayer>(nameof(LayerNames.Floor)));
-        fixtures.ForEach(f => AddChild(f));
+        fixtures.ForEach(f =>
+        {
+            AddChild(f);
+            FixtureGraph.AddNode(f, false);
+        });
     }
 
     private void UpdateFixtureGraph()
     {
-        var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
-        var aStarGrid = new AStarGrid2D();
-
         foreach (var chunkPos in Chunks.Keys.Where(k => Chunks[k].IsDirty))
         {
-            foreach (var fixture in Chunks[chunkPos].Fixtures)
+            Chunks[chunkPos].Fixtures.ForEach(fixture => FixtureGraph.UpdateNeighborsOf(fixture));
+            Chunks[chunkPos].IsDirty = false;
+        }
+
+        HandlePotentialDisconnection();
+
+        return;
+
+        void HandlePotentialDisconnection()
+        {
+            var components = FixtureGraph.GetConnectedComponents();
+
+            if (components.Count == 1)
             {
-                foreach (var neighborChunk in GetNeighboringChunksOf(chunkPos))
-                {
-                    aStarGrid.Region = Chunks[chunkPos].Bounds.Merge(neighborChunk.Bounds);
-                    aStarGrid.Update();
-
-                    aStarGrid.FillSolidRegion(aStarGrid.Region);
-
-                    foreach (var cell in tileMap.GetUsedCells().Where(c => aStarGrid.Region.HasPoint(c)))
-                    {
-                        aStarGrid.SetPointSolid(cell, false);
-                    }
-
-                    foreach (var otherFixture in neighborChunk.Fixtures)
-                    {
-                        if (aStarGrid.GetIdPath(fixture.ReferenceCell, otherFixture.ReferenceCell).Count != 0)
-                        {
-                            fixture.Neighbors.Add(otherFixture);
-                            otherFixture.Neighbors.Add(fixture);
-                        }
-                    }
-                }
+                return;
             }
 
-            Chunks[chunkPos].IsDirty = false;
+            // iterate over the components and create new GridBodys as necessary
+            foreach (var comp in components.Skip(1))
+            {
+                var oldFloor = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
+
+                var newBody = new GridBody
+                {
+                    AngularVelocity = AngularVelocity,
+                    LinearVelocity = LinearVelocity,
+                };
+                var newMap = (TileMapLayer)oldFloor.Duplicate();
+                newMap.Clear();
+
+                foreach (var fixture in comp)
+                {
+                    foreach (var cell in fixture.ContainedCells)
+                    {
+                        newMap.SetCell(
+                            cell, 
+                            oldFloor.GetCellSourceId(cell), 
+                            oldFloor.GetCellAtlasCoords(cell),
+                            oldFloor.GetCellAlternativeTile(cell));
+                        
+                        oldFloor.EraseCell(cell);
+                    }
+                }
+
+                newBody.AddChild(newMap);
+            }
         }
     }
 
