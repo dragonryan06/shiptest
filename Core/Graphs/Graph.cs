@@ -58,6 +58,7 @@ public class Graph<T> where T: IGraphNode
             var component = new List<T>();
             IGraphNode node = Nodes.First(n => !n.Visited);
             node.Visited = true;
+            component.Add((T)node);
             List<IGraphNode> neighborStack = node.Neighbors.Where(n => !n.Visited).ToList();
             
             while (neighborStack.Count != 0)

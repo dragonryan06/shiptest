@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://cgppi0bt3h8v0" path="res://Core/World.cs" id="1_pmidl"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_7h14u"]
-[ext_resource type="PackedScene" uid="uid://dw37jw7kh0vyp" path="res://Resources/Scenes/test_grid_object.tscn" id="3_5o0xi"]
-[ext_resource type="Script" uid="uid://ctnv3mwjqcj8y" path="res://Grids/GridBody.cs" id="4_ye1hu"]
-[ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="5_cq0i2"]
+[ext_resource type="PackedScene" uid="uid://dw37jw7kh0vyp" path="res://Resources/Scenes/test_grid_object.tscn" id="4_wc75r"]
+[ext_resource type="Script" uid="uid://ctnv3mwjqcj8y" path="res://Grids/GridBody.cs" id="5_ye1hu"]
 [ext_resource type="PackedScene" uid="uid://dq17chvc36u4q" path="res://Resources/Scenes/chunk_splitting_tester.tscn" id="6_cq0i2"]
+[ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="6_xapce"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ye1hu"]
 
@@ -29,23 +29,19 @@ color = Color(1, 1, 1, 0)
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("2_7h14u")
 
-[node name="TestGridObject" parent="." instance=ExtResource("3_5o0xi")]
-position = Vector2(-559, -209)
-
-[node name="TestGridObject2" parent="." instance=ExtResource("3_5o0xi")]
-position = Vector2(-561, -316)
-
-[node name="BigGridObject" type="RigidBody2D" parent="."]
-position = Vector2(-470, 160)
-input_pickable = true
-script = ExtResource("4_ye1hu")
-
-[node name="Floor" type="TileMapLayer" parent="BigGridObject"]
-tile_map_data = PackedByteArray("AAAAAAAAAQAAAAAAAAABAAEAAQAAAAAAAAABAAAAAQAAAAAAAAACAAAAAQAAAAAAAAADAAAAAQAAAAAAAAACAAEAAQAAAAAAAAAAAAEAAQAAAAAAAAD//wEAAQAAAAAAAAD//wAAAQAAAAAAAAD/////AQAAAAAAAAD+////AQAAAAAAAAD+/wAAAQAAAAAAAAD+/wEAAQAAAAAAAAADAAEAAQAAAAAAAAACAP//AQAAAAAAAAABAP//AQAAAAAAAAAAAP//AQAAAAAAAAD9/wAAAQAAAAAAAAD9/wEAAQAAAAAAAAD9/wIAAQAAAAAAAAD9/wMAAQAAAAAAAAD+/wMAAQAAAAAAAAD+/wIAAQAAAAAAAAD//wIAAQAAAAAAAAAAAAIAAQAAAAAAAAABAAIAAQAAAAAAAAACAAIAAQAAAAAAAAADAAIAAQAAAAAAAAADAAMAAQAAAAAAAAACAAMAAQAAAAAAAAABAAMAAQAAAAAAAAAAAAMAAQAAAAAAAAD//wMAAQAAAAAAAAD+/wQAAQAAAAAAAAD//wQAAQAAAAAAAAAAAAQAAQAAAAAAAAABAAQAAQAAAAAAAAACAAQAAQAAAAAAAAA=")
-tile_set = ExtResource("5_cq0i2")
-
 [node name="ChunkSplittingTester" parent="." instance=ExtResource("6_cq0i2")]
-position = Vector2(34, -48)
+position = Vector2(339, -163)
+
+[node name="TestGridObject" parent="." instance=ExtResource("4_wc75r")]
+position = Vector2(-503, -246)
+
+[node name="BigBody" type="RigidBody2D" parent="."]
+input_pickable = true
+script = ExtResource("5_ye1hu")
+
+[node name="Floor" type="TileMapLayer" parent="BigBody"]
+tile_map_data = PackedByteArray("AAD//wEAAQAAAAAAAAD//wAAAQAAAAAAAAD/////AQAAAAAAAAD///7/AQAAAAAAAAAAAP7/AQAAAAAAAAAAAP//AQAAAAAAAAAAAAAAAQAAAAAAAAAAAAEAAQAAAAAAAAD//wIAAQAAAAAAAAAAAAIAAQAAAAAAAAD///3/AQAAAAAAAAAAAP3/AQAAAAAAAAD+/wEAAQAAAAAAAAD+/wAAAQAAAAAAAAABAP7/AQAAAAAAAAABAP//AQAAAAAAAAABAAAAAQAAAAAAAAABAAEAAQAAAAAAAAD+/wIAAAAAAAAAAAD9/wEAAAAAAAAAAAD9/wAAAAAAAAAAAAD9////AAAAAAAAAAD9//7/AQAAAAAAAAD+//3/AQAAAAAAAAABAP3/AQAAAAAAAAACAP7/AQAAAAAAAAACAP//AAAAAAAAAAACAAAAAAAAAAAAAAACAAEAAAAAAAAAAAABAAIAAAAAAAAAAAD9//3/AQAAAAAAAAD8//3/AQAAAAAAAAD7//3/AQAAAAAAAAD6//3/AQAAAAAAAAD5//3/AQAAAAAAAAD6//7/AQAAAAAAAAD7//7/AQAAAAAAAAD8//7/AQAAAAAAAAACAP3/AQAAAAAAAAADAP3/AQAAAAAAAAAEAP3/AQAAAAAAAAAFAP3/AQAAAAAAAAAGAP3/AQAAAAAAAAADAP7/AQAAAAAAAAAEAP7/AQAAAAAAAAAFAP7/AQAAAAAAAAD5//7/AAAAAAAAAAD6////AAAAAAAAAAD7////AAAAAAAAAAD8////AAAAAAAAAAD4//3/AAAAAAAAAAADAP//AAAAAAAAAAAEAP//AAAAAAAAAAAFAP//AAAAAAAAAAAGAP7/AAAAAAAAAAD+//7/AQAAAAAAAAD+////AQAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAAGAP//AAAAAAAAAAAGAAAAAAAAAAAAAAAGAAEAAAAAAAAAAAD7/wAAAAAAAAAAAAD7/wEAAAAAAAAAAAD7/wIAAAAAAAAAAAD5////AAAAAAAAAAD5/wAAAAAAAAAAAAD5/wEAAAAAAAAAAAA=")
+tile_set = ExtResource("6_xapce")
 
 [node name="WorldBoundaries" type="Node" parent="."]
 

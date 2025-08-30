@@ -198,6 +198,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             fixture.QueueFree();
         }
 
+        chunk.Fixtures.ForEach(f => FixtureGraph.RemoveNode(f));
         chunk.Fixtures.Clear();
 
         var fixtures = chunk.GenerateCollisions(GetNode<TileMapLayer>(nameof(LayerNames.Floor)));
@@ -236,14 +237,20 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 
                 var newBody = new GridBody
                 {
-                    AngularVelocity = AngularVelocity,
+                    Name = $"Debris ({Name})",
+                    Position = Position,
+                    Rotation = Rotation,
                     LinearVelocity = LinearVelocity,
+                    AngularVelocity = AngularVelocity,
                 };
                 var newMap = (TileMapLayer)oldFloor.Duplicate();
                 newMap.Clear();
 
                 foreach (var fixture in comp)
                 {
+                    FixtureGraph.RemoveNode(fixture);
+                    RemoveChild(fixture);
+                    
                     foreach (var cell in fixture.ContainedCells)
                     {
                         newMap.SetCell(
@@ -256,7 +263,11 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                     }
                 }
 
+                // this one just for the janky debug thing
+                newBody.InputPickable = true;
+                
                 newBody.AddChild(newMap);
+                AddSibling(newBody);
             }
         }
     }
