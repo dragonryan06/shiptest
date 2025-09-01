@@ -165,7 +165,10 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     {
         foreach (var fixture in chunk.Fixtures)
         {
-            RemoveChild(fixture);
+            if (HasNode(new NodePath(fixture.Name)))
+            {
+                RemoveChild(fixture);
+            }
             fixture.QueueFree();
         }
 
@@ -173,6 +176,18 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         chunk.Fixtures.Clear();
 
         var fixtures = chunk.GenerateCollisions(GetNode<TileMapLayer>(nameof(LayerNames.Floor)));
+
+        if (fixtures.Count == 0)
+        {
+            Chunks.Remove(TileToChunkPos(chunk.Bounds.Position));
+
+            if (Chunks.Count == 0)
+            {
+                GetParent().RemoveChild(this);
+                QueueFree();
+            }
+        }
+        
         fixtures.ForEach(f =>
         {
             AddChild(f);
@@ -233,6 +248,8 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                         oldFloor.EraseCell(cell);
                     }
                 }
+                
+                SetCenterOfMass();
 
                 // this one just for the debug explosions
                 newBody.InputPickable = true;

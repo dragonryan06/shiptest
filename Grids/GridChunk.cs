@@ -28,7 +28,6 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 
         if (polygons.Count == 0)
         {
-            GD.PushError($"No polygon generated for {Name}!");
             return [];
         }
 

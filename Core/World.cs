@@ -4,7 +4,7 @@ using ShipTest.Globals;
 namespace ShipTest.Core;
 public partial class World : Node2D
 {
-    [Export(PropertyHint.Flags, "General:1,Physics:2,Automata:4,Grids:8")] 
+    [Export(PropertyHint.Flags)] 
     public DebugLayerFlags DebugLayers { get; set; }
     
     public override void _Ready()
