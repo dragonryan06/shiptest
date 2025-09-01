@@ -1,10 +1,11 @@
-[gd_scene load_steps=11 format=4 uid="uid://cnp4pn6ddccft"]
+[gd_scene load_steps=12 format=4 uid="uid://cnp4pn6ddccft"]
 
 [ext_resource type="Script" uid="uid://cgppi0bt3h8v0" path="res://Core/World.cs" id="1_pmidl"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_7h14u"]
-[ext_resource type="PackedScene" uid="uid://dw37jw7kh0vyp" path="res://Resources/Scenes/test_grid_object.tscn" id="4_wc75r"]
+[ext_resource type="Script" uid="uid://dv1bo0aeykxrp" path="res://Resources/Scripts/cursor_pusher.gd" id="3_xapce"]
+[ext_resource type="PackedScene" uid="uid://dw37jw7kh0vyp" path="res://Resources/Scenes/Debug/test_grid_object.tscn" id="4_wc75r"]
 [ext_resource type="Script" uid="uid://ctnv3mwjqcj8y" path="res://Grids/GridBody.cs" id="5_ye1hu"]
-[ext_resource type="PackedScene" uid="uid://dq17chvc36u4q" path="res://Resources/Scenes/chunk_splitting_tester.tscn" id="6_cq0i2"]
+[ext_resource type="PackedScene" uid="uid://dq17chvc36u4q" path="res://Resources/Scenes/Debug/chunk_splitting_tester.tscn" id="6_cq0i2"]
 [ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="6_xapce"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ye1hu"]
@@ -20,6 +21,7 @@ normal = Vector2(1, 0)
 
 [node name="World" type="Node2D"]
 script = ExtResource("1_pmidl")
+DebugLayers = 3
 
 [node name="InfiniteGrid" type="ColorRect" parent="."]
 offset_right = 1152.0
@@ -28,6 +30,12 @@ color = Color(1, 1, 1, 0)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("2_7h14u")
+
+[node name="CursorPusher" type="CharacterBody2D" parent="Camera2D"]
+script = ExtResource("3_xapce")
+metadata/_custom_type_script = "uid://dv1bo0aeykxrp"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Camera2D/CursorPusher"]
 
 [node name="ChunkSplittingTester" parent="." instance=ExtResource("6_cq0i2")]
 position = Vector2(339, -163)
