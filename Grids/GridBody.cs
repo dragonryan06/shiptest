@@ -17,7 +17,6 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     private const int ChunkSize = 16;
 
     private bool _mouseHover;
-    private bool _mouseDrag;
 
     public Dictionary<Vector2I, GridChunk> Chunks { get; } = new();
 
@@ -75,22 +74,6 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 
         switch (mouseButton.ButtonIndex)
         {
-            case MouseButton.Left:
-
-                if (_mouseHover && mouseButton.IsPressed())
-                {
-                    _mouseDrag = true;
-                    Freeze = true;
-                }
-                else if (_mouseDrag)
-                {
-                    _mouseDrag = false;
-                    Freeze = false;
-                    ApplyCentralImpulse(Input.GetLastMouseVelocity());
-                }
-
-                break;
-
             case MouseButton.Right when _mouseHover && mouseButton.IsPressed():
 
                 if (HasNode("ExplosionComponent")) // TODO: maybe an IEntity.HasComp(Component) would be cool? or maybe something that injects the component if it isn't present.
@@ -124,18 +107,6 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                 new Color("#0000ff"), 
                 DebugLayerFlags.Physics, 
                 1f));
-    }
-
-    public override void _PhysicsProcess(double delta)
-    {
-        if (_mouseDrag)
-        {
-            var collision = MoveAndCollide(GetLocalMousePosition());
-            if (collision != null && collision.GetCollider() is RigidBody2D body)
-            {
-                body.ApplyCentralImpulse(-collision.GetNormal()*new Vector2(80,80));
-            }
-        }
     }
 
     public static Vector2I TileToChunkPos(Vector2I tilePos)
@@ -263,7 +234,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                     }
                 }
 
-                // this one just for the janky debug thing
+                // this one just for the debug explosions
                 newBody.InputPickable = true;
                 
                 newBody.AddChild(newMap);
