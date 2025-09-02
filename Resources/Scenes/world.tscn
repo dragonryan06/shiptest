@@ -29,14 +29,14 @@ offset_bottom = 648.0
 mouse_filter = 2
 color = Color(1, 1, 1, 0)
 
-[node name="Camera2D" type="Camera2D" parent="."]
-script = ExtResource("2_7h14u")
-
-[node name="CursorPusher" type="CharacterBody2D" parent="Camera2D"]
+[node name="CursorPusher" type="CharacterBody2D" parent="."]
 script = ExtResource("3_xapce")
 metadata/_custom_type_script = "uid://dv1bo0aeykxrp"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Camera2D/CursorPusher"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CursorPusher"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("2_7h14u")
 
 [node name="ChunkSplittingTester" parent="." instance=ExtResource("6_cq0i2")]
 position = Vector2(339, -163)
@@ -49,33 +49,40 @@ input_pickable = true
 script = ExtResource("5_ye1hu")
 
 [node name="Floor" type="TileMapLayer" parent="BigBody"]
-tile_map_data = PackedByteArray("AAD//wEAAQAAAAAAAAD//wAAAQAAAAAAAAD/////AQAAAAAAAAD///7/AQAAAAAAAAAAAP7/AQAAAAAAAAAAAP//AQAAAAAAAAAAAAAAAQAAAAAAAAAAAAEAAQAAAAAAAAD//wIAAQAAAAAAAAAAAAIAAQAAAAAAAAD///3/AQAAAAAAAAAAAP3/AQAAAAAAAAD+/wEAAQAAAAAAAAD+/wAAAQAAAAAAAAABAP7/AQAAAAAAAAABAP//AQAAAAAAAAABAAAAAQAAAAAAAAABAAEAAQAAAAAAAAD+/wIAAAAAAAAAAAD9/wEAAAAAAAAAAAD9/wAAAAAAAAAAAAD9////AAAAAAAAAAD9//7/AQAAAAAAAAD+//3/AQAAAAAAAAABAP3/AQAAAAAAAAACAP7/AQAAAAAAAAACAP//AAAAAAAAAAACAAAAAAAAAAAAAAACAAEAAAAAAAAAAAABAAIAAAAAAAAAAAD9//3/AQAAAAAAAAD8//3/AQAAAAAAAAD7//3/AQAAAAAAAAD6//3/AQAAAAAAAAD5//3/AQAAAAAAAAD6//7/AQAAAAAAAAD7//7/AQAAAAAAAAD8//7/AQAAAAAAAAACAP3/AQAAAAAAAAADAP3/AQAAAAAAAAAEAP3/AQAAAAAAAAAFAP3/AQAAAAAAAAAGAP3/AQAAAAAAAAADAP7/AQAAAAAAAAAEAP7/AQAAAAAAAAAFAP7/AQAAAAAAAAD5//7/AAAAAAAAAAD6////AAAAAAAAAAD7////AAAAAAAAAAD8////AAAAAAAAAAD4//3/AAAAAAAAAAADAP//AAAAAAAAAAAEAP//AAAAAAAAAAAFAP//AAAAAAAAAAAGAP7/AAAAAAAAAAD+//7/AQAAAAAAAAD+////AQAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAAGAP//AAAAAAAAAAAGAAAAAAAAAAAAAAAGAAEAAAAAAAAAAAD7/wAAAAAAAAAAAAD7/wEAAAAAAAAAAAD7/wIAAAAAAAAAAAD5////AAAAAAAAAAD5/wAAAAAAAAAAAAD5/wEAAAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAD//wEAAQAAAAAAAAD//wAAAQAAAAAAAAD/////AQAAAAAAAAD///7/AQAAAAAAAAAAAP7/AQAAAAAAAAAAAP//AQAAAAAAAAAAAAAAAQAAAAAAAAAAAAEAAQAAAAAAAAD//wIAAQAAAAAAAAAAAAIAAQAAAAAAAAD///3/AQAAAAAAAAAAAP3/AQAAAAAAAAD+/wEAAQAAAAAAAAD+/wAAAQAAAAAAAAABAP7/AQAAAAAAAAABAP//AQAAAAAAAAABAAAAAQAAAAAAAAABAAEAAQAAAAAAAAD+/wIAAAAAAAAAAAD9/wEAAAAAAAAAAAD9/wAAAAAAAAAAAAD9////AAAAAAAAAAD9//7/AQAAAAAAAAD+//3/AQAAAAAAAAABAP3/AQAAAAAAAAACAP7/AQAAAAAAAAACAP//AAAAAAAAAAACAAAAAAAAAAAAAAACAAEAAAAAAAAAAAABAAIAAAAAAAAAAAD9//3/AQAAAAAAAAD8//3/AQAAAAAAAAD7//3/AQAAAAAAAAD6//3/AQAAAAAAAAD5//3/AQAAAAAAAAD6//7/AQAAAAAAAAD7//7/AQAAAAAAAAD8//7/AQAAAAAAAAACAP3/AQAAAAAAAAADAP3/AQAAAAAAAAAEAP3/AQAAAAAAAAAFAP3/AQAAAAAAAAAGAP3/AQAAAAAAAAADAP7/AQAAAAAAAAAEAP7/AQAAAAAAAAAFAP7/AQAAAAAAAAD5//7/AAAAAAAAAAD6////AAAAAAAAAAD7////AAAAAAAAAAD8////AAAAAAAAAAADAP//AAAAAAAAAAAEAP//AAAAAAAAAAAFAP//AAAAAAAAAAAGAP7/AAAAAAAAAAD+//7/AQAAAAAAAAD+////AQAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAAGAP//AAAAAAAAAAAGAAAAAAAAAAAAAAAGAAEAAAAAAAAAAAD7/wAAAAAAAAAAAAD7/wEAAAAAAAAAAAD7/wIAAAAAAAAAAAD5////AAAAAAAAAAD5/wAAAAAAAAAAAAD5/wEAAAAAAAAAAAA=")
 tile_set = ExtResource("6_xapce")
 
 [node name="WorldBoundaries" type="Node" parent="."]
 
 [node name="WorldBoundary_South" type="StaticBody2D" parent="WorldBoundaries"]
-position = Vector2(0, 326)
+position = Vector2(0, 1024)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/WorldBoundary_South"]
 shape = SubResource("WorldBoundaryShape2D_ye1hu")
 
 [node name="WorldBoundary_North" type="StaticBody2D" parent="WorldBoundaries"]
-position = Vector2(0, -326)
+position = Vector2(0, -1024)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/WorldBoundary_North"]
 shape = SubResource("WorldBoundaryShape2D_cq0i2")
 
 [node name="WorldBoundary_East" type="StaticBody2D" parent="WorldBoundaries"]
-position = Vector2(576, -1)
+position = Vector2(1024, -1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/WorldBoundary_East"]
 position = Vector2(1, 1)
 shape = SubResource("WorldBoundaryShape2D_hddtm")
 
 [node name="WorldBoundary_West" type="StaticBody2D" parent="WorldBoundaries"]
-position = Vector2(-578, -1)
+position = Vector2(-1024, -1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WorldBoundaries/WorldBoundary_West"]
 position = Vector2(1, 1)
 shape = SubResource("WorldBoundaryShape2D_xapce")
+
+[node name="Polygon2D" type="Polygon2D" parent="WorldBoundaries"]
+position = Vector2(0, 1024)
+color = Color(1, 1, 1, 0.278431)
+invert_enabled = true
+invert_border = 4096.0
+polygon = PackedVector2Array(-1024, 0, -1024, -2048, 1024, -2048, 1024, 0)
