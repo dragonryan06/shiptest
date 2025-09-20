@@ -9,6 +9,9 @@ public partial class FreeCam : Camera2D
 
     private bool _dragging;
     private float _zoomSetpoint = 1.0f;
+
+    [Signal]
+    public delegate void CameraChangedEventHandler();
     
     public override void _Input(InputEvent @event)
     {
@@ -26,6 +29,7 @@ public partial class FreeCam : Camera2D
         if (_dragging && @event is InputEventMouseMotion motion)
         {
             Position -= motion.Relative * new Vector2(1.0f/Zoom.X, 1.0f/Zoom.Y);
+            EmitSignalCameraChanged();
         }
 
         if (@event is InputEventMouseButton button)
@@ -45,6 +49,12 @@ public partial class FreeCam : Camera2D
     public override void _Process(double delta)
     {
         _zoomSetpoint = Mathf.Clamp(_zoomSetpoint, ZoomMin, ZoomMax);
-        Zoom = Zoom.Lerp(new Vector2(_zoomSetpoint, _zoomSetpoint), (float)delta*4.0f);
+        var newZoom = Zoom.Lerp(new Vector2(_zoomSetpoint, _zoomSetpoint), (float)delta * 4.0f);
+
+        if (newZoom != Zoom)
+        {
+            Zoom = newZoom;
+            EmitSignalCameraChanged();
+        }
     }
 }
