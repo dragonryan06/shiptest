@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://blr11yfekwbn3"
-path="res://.godot/imported/fire_2.png-9ae08e04769729d5029d27f3b316e8d6.ctex"
+uid="uid://7ujv038qqrmt"
+path="res://.godot/imported/lattice.png-9edfab564f0a60e88087c3fb199ba5ff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Resources/Textures/fire_2.png"
-dest_files=["res://.godot/imported/fire_2.png-9ae08e04769729d5029d27f3b316e8d6.ctex"]
+source_file="res://Resources/Textures/Icons/lattice.png"
+dest_files=["res://.godot/imported/lattice.png-9edfab564f0a60e88087c3fb199ba5ff.ctex"]
 
 [params]
 

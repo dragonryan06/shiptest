@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://ocahqt1rmxcs"]
+
+[ext_resource type="Texture2D" uid="uid://c8a4mdlugu8om" path="res://Resources/Textures/icon.svg" id="1_2jmkw"]
+
+[node name="PartInventoryItem" type="Button"]
+icon = ExtResource("1_2jmkw")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Part Name"
+horizontal_alignment = 1

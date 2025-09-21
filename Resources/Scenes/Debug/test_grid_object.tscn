@@ -1,8 +1,8 @@
 [gd_scene load_steps=7 format=4 uid="uid://dw37jw7kh0vyp"]
 
 [ext_resource type="Script" uid="uid://ctnv3mwjqcj8y" path="res://Grids/GridBody.cs" id="1_funbh"]
-[ext_resource type="Texture2D" uid="uid://dnhtsn4n7kvaa" path="res://Resources/Textures/lattice.png" id="2_hva2x"]
-[ext_resource type="Texture2D" uid="uid://p80n5oafleis" path="res://Resources/Textures/plating.png" id="3_w6a6n"]
+[ext_resource type="Texture2D" uid="uid://dnhtsn4n7kvaa" path="res://Resources/Textures/Tiles/lattice.png" id="2_hva2x"]
+[ext_resource type="Texture2D" uid="uid://p80n5oafleis" path="res://Resources/Textures/Tiles/plating.png" id="3_w6a6n"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hva2x"]
 texture = ExtResource("2_hva2x")

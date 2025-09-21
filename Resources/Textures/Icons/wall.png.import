@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://p80n5oafleis"
-path="res://.godot/imported/plating.png-b56efcd95af73cdb0042f64f461eb25f.ctex"
+uid="uid://dg52x2surrpm7"
+path="res://.godot/imported/wall.png-965fe65c45f5af0bb405b5186a3ed2a2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Resources/Textures/plating.png"
-dest_files=["res://.godot/imported/plating.png-b56efcd95af73cdb0042f64f461eb25f.ctex"]
+source_file="res://Resources/Textures/Icons/wall.png"
+dest_files=["res://.godot/imported/wall.png-965fe65c45f5af0bb405b5186a3ed2a2.ctex"]
 
 [params]
 

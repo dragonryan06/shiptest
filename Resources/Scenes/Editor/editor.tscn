@@ -1,0 +1,407 @@
+[gd_scene load_steps=28 format=3 uid="uid://cdrvglcjb21bd"]
+
+[ext_resource type="Script" uid="uid://cqqlh42oncn64" path="res://Editor/Editor.cs" id="1_jlxre"]
+[ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_sp4rm"]
+[ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="3_06x8c"]
+[ext_resource type="PackedScene" uid="uid://ocahqt1rmxcs" path="res://Resources/Scenes/Editor/part_inventory_item.tscn" id="4_ofvp3"]
+[ext_resource type="Script" uid="uid://37do7kmfj2sn" path="res://Resources/Scripts/editor_hud.gd" id="4_sp4rm"]
+
+[sub_resource type="InputEventKey" id="InputEventKey_8ba6r"]
+device = -1
+keycode = 49
+unicode = 49
+
+[sub_resource type="Shortcut" id="Shortcut_jb683"]
+events = [SubResource("InputEventKey_8ba6r")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_csnxl"]
+device = -1
+keycode = 50
+unicode = 50
+
+[sub_resource type="Shortcut" id="Shortcut_ooi5q"]
+events = [SubResource("InputEventKey_csnxl")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_h4mum"]
+device = -1
+keycode = 51
+unicode = 51
+
+[sub_resource type="Shortcut" id="Shortcut_c5jqk"]
+events = [SubResource("InputEventKey_h4mum")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_6ghim"]
+device = -1
+keycode = 52
+unicode = 52
+
+[sub_resource type="Shortcut" id="Shortcut_xny3a"]
+events = [SubResource("InputEventKey_6ghim")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_45i8i"]
+device = -1
+keycode = 53
+unicode = 53
+
+[sub_resource type="Shortcut" id="Shortcut_xbr4b"]
+events = [SubResource("InputEventKey_45i8i")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_yk7qt"]
+device = -1
+keycode = 54
+unicode = 54
+
+[sub_resource type="Shortcut" id="Shortcut_a1o1s"]
+events = [SubResource("InputEventKey_yk7qt")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_bq7h1"]
+device = -1
+keycode = 55
+unicode = 55
+
+[sub_resource type="Shortcut" id="Shortcut_wocda"]
+events = [SubResource("InputEventKey_bq7h1")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_3ltei"]
+device = -1
+keycode = 56
+unicode = 56
+
+[sub_resource type="Shortcut" id="Shortcut_li5fb"]
+events = [SubResource("InputEventKey_3ltei")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_n3sto"]
+device = -1
+keycode = 57
+unicode = 57
+
+[sub_resource type="Shortcut" id="Shortcut_cefwo"]
+events = [SubResource("InputEventKey_n3sto")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_6xw7f"]
+device = -1
+keycode = 48
+unicode = 48
+
+[sub_resource type="Shortcut" id="Shortcut_pssew"]
+events = [SubResource("InputEventKey_6xw7f")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_jb683"]
+device = -1
+keycode = 69
+unicode = 101
+
+[sub_resource type="Shortcut" id="Shortcut_csnxl"]
+events = [SubResource("InputEventKey_jb683")]
+
+[node name="Editor" type="Node2D"]
+script = ExtResource("1_jlxre")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("2_sp4rm")
+
+[node name="Floor" type="TileMapLayer" parent="."]
+tile_set = ExtResource("3_06x8c")
+
+[node name="Walls" type="TileMapLayer" parent="."]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("4_sp4rm")
+
+[node name="Hotbar" type="MarginContainer" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -40.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HUD/Hotbar"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_jb683")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "1"
+horizontal_alignment = 1
+
+[node name="Button2" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_ooi5q")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button2"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "2"
+horizontal_alignment = 1
+
+[node name="Button3" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_c5jqk")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button3"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "3"
+horizontal_alignment = 1
+
+[node name="Button4" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_xny3a")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button4"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "4"
+horizontal_alignment = 1
+
+[node name="Button5" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_xbr4b")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button5"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "5"
+horizontal_alignment = 1
+
+[node name="Button6" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_a1o1s")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button6"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "6"
+horizontal_alignment = 1
+
+[node name="Button7" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_wocda")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button7"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "7"
+horizontal_alignment = 1
+
+[node name="Button8" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_li5fb")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button8"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "8"
+horizontal_alignment = 1
+
+[node name="Button9" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_cefwo")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button9"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "9"
+horizontal_alignment = 1
+
+[node name="Button10" type="Button" parent="HUD/Hotbar/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_pssew")
+
+[node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button10"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "0"
+horizontal_alignment = 1
+
+[node name="ShowInventory" type="Button" parent="HUD"]
+custom_minimum_size = Vector2(64, 64)
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -72.0
+offset_top = -64.0
+grow_horizontal = 0
+grow_vertical = 0
+toggle_mode = true
+shortcut = SubResource("Shortcut_csnxl")
+text = "Show Inventory"
+
+[node name="PartInventory" type="MarginContainer" parent="HUD"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1152.0
+offset_right = 1152.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 128
+theme_override_constants/margin_top = 52
+theme_override_constants/margin_right = 128
+theme_override_constants/margin_bottom = 76
+
+[node name="PanelContainer" type="PanelContainer" parent="HUD/PartInventory"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD/PartInventory/PanelContainer"]
+layout_mode = 2
+
+[node name="MenuHeader" type="MarginContainer" parent="HUD/PartInventory/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+
+[node name="Label" type="Label" parent="HUD/PartInventory/PanelContainer/VBoxContainer/MenuHeader"]
+layout_mode = 2
+text = "Part Inventory"
+
+[node name="HSeparator" type="HSeparator" parent="HUD/PartInventory/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HUD/PartInventory/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+
+[node name="GridContainer" type="GridContainer" parent="HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 4
+
+[node name="PartInventoryItem" parent="HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer" instance=ExtResource("4_ofvp3")]
+layout_mode = 2
+
+[node name="PartInventoryItem2" parent="HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer" instance=ExtResource("4_ofvp3")]
+layout_mode = 2
+
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button" to="HUD" method="_on_hotbar_button_pressed" binds= [0]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button2" to="HUD" method="_on_hotbar_button_pressed" binds= [1]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button3" to="HUD" method="_on_hotbar_button_pressed" binds= [2]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button4" to="HUD" method="_on_hotbar_button_pressed" binds= [3]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button5" to="HUD" method="_on_hotbar_button_pressed" binds= [4]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button6" to="HUD" method="_on_hotbar_button_pressed" binds= [5]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button7" to="HUD" method="_on_hotbar_button_pressed" binds= [6]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button8" to="HUD" method="_on_hotbar_button_pressed" binds= [7]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button9" to="HUD" method="_on_hotbar_button_pressed" binds= [8]]
+[connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button10" to="HUD" method="_on_hotbar_button_pressed" binds= [9]]
+[connection signal="toggled" from="HUD/ShowInventory" to="HUD" method="_on_show_inventory_toggled"]
