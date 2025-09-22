@@ -1,9 +1,8 @@
-[gd_scene load_steps=28 format=3 uid="uid://cdrvglcjb21bd"]
+[gd_scene load_steps=27 format=3 uid="uid://cdrvglcjb21bd"]
 
 [ext_resource type="Script" uid="uid://cqqlh42oncn64" path="res://Editor/Editor.cs" id="1_jlxre"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_sp4rm"]
 [ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="3_06x8c"]
-[ext_resource type="PackedScene" uid="uid://ocahqt1rmxcs" path="res://Resources/Scenes/Editor/part_inventory_item.tscn" id="4_ofvp3"]
 [ext_resource type="Script" uid="uid://37do7kmfj2sn" path="res://Resources/Scripts/editor_hud.gd" id="4_sp4rm"]
 
 [sub_resource type="InputEventKey" id="InputEventKey_8ba6r"]
@@ -386,13 +385,7 @@ theme_override_constants/margin_left = 8
 layout_mode = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
-columns = 4
-
-[node name="PartInventoryItem" parent="HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer" instance=ExtResource("4_ofvp3")]
-layout_mode = 2
-
-[node name="PartInventoryItem2" parent="HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer" instance=ExtResource("4_ofvp3")]
-layout_mode = 2
+columns = 8
 
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button" to="HUD" method="_on_hotbar_button_pressed" binds= [0]]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button2" to="HUD" method="_on_hotbar_button_pressed" binds= [1]]

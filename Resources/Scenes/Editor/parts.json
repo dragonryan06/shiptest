@@ -1,35 +1,41 @@
 [
-	{ 
+	{
+		"id" : 0,
 		"name" : "Lattice",
 		"icon" : "res://Resources/Textures/Icons/lattice.png",
 		"type" : "tile_floor"
 	},
 	
 	{
+		"id" : 1,
 		"name" : "Angled Lattice",
 		"icon" : "res://Resources/Textures/Icons/lattice_angled.png",
 		"type" : "tile_floor"
 	},
 	
 	{
+		"id" : 2,
 		"name" : "Plating",
 		"icon" : "res://Resources/Textures/Icons/plating.png",
 		"type" : "tile_floor"
 	},
 	
 	{
+		"id" : 3,
 		"name" : "Angled Plating",
 		"icon" : "res://Resources/Textures/Icons/plating_angled.png",
 		"type" : "tile_floor"
 	},
 	
 	{
+		"id" : 4,
 		"name" : "Wall",
 		"icon" : "res://Resources/Textures/Icons/wall.png",
 		"type" : "tile_wall"
 	},
 	
 	{
+		"id" : 5,
 		"name" : "Reinforced Wall",
 		"icon" : "res://Resources/Textures/Icons/r_wall.png",
 		"type" : "tile_wall"

@@ -1,9 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://ocahqt1rmxcs"]
-
-[ext_resource type="Texture2D" uid="uid://c8a4mdlugu8om" path="res://Resources/Textures/icon.svg" id="1_2jmkw"]
+[gd_scene format=3 uid="uid://ocahqt1rmxcs"]
 
 [node name="PartInventoryItem" type="Button"]
-icon = ExtResource("1_2jmkw")
+custom_minimum_size = Vector2(96, 96)
+focus_mode = 0
+icon_alignment = 1
+expand_icon = true
+metadata/part_id = 0
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 1
