@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://cdrvglcjb21bd"]
+[gd_scene load_steps=29 format=3 uid="uid://cdrvglcjb21bd"]
 
 [ext_resource type="Script" uid="uid://cqqlh42oncn64" path="res://Editor/Editor.cs" id="1_jlxre"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_sp4rm"]
@@ -93,6 +93,13 @@ unicode = 101
 [sub_resource type="Shortcut" id="Shortcut_csnxl"]
 events = [SubResource("InputEventKey_jb683")]
 
+[sub_resource type="InputEventKey" id="InputEventKey_jlxre"]
+device = -1
+keycode = 4194305
+
+[sub_resource type="Shortcut" id="Shortcut_sp4rm"]
+events = [SubResource("InputEventKey_jlxre")]
+
 [node name="Editor" type="Node2D"]
 script = ExtResource("1_jlxre")
 
@@ -127,6 +134,8 @@ layout_mode = 2
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_jb683")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button"]
 layout_mode = 1
@@ -147,6 +156,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_ooi5q")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button2"]
 layout_mode = 1
@@ -167,6 +178,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_c5jqk")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button3"]
 layout_mode = 1
@@ -187,6 +200,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_xny3a")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button4"]
 layout_mode = 1
@@ -207,6 +222,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_xbr4b")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button5"]
 layout_mode = 1
@@ -227,6 +244,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_a1o1s")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button6"]
 layout_mode = 1
@@ -247,6 +266,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_wocda")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button7"]
 layout_mode = 1
@@ -267,6 +288,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_li5fb")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button8"]
 layout_mode = 1
@@ -287,6 +310,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_cefwo")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button9"]
 layout_mode = 1
@@ -307,6 +332,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 shortcut = SubResource("Shortcut_pssew")
+icon_alignment = 1
+expand_icon = true
 
 [node name="Label" type="Label" parent="HUD/Hotbar/HBoxContainer/Button10"]
 layout_mode = 1
@@ -387,6 +414,51 @@ theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 columns = 8
 
+[node name="SelectDialog" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -126.0
+offset_top = -61.5
+offset_right = 126.0
+offset_bottom = 61.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD/SelectDialog"]
+layout_mode = 2
+
+[node name="MenuHeader" type="MarginContainer" parent="HUD/SelectDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+
+[node name="Label" type="Label" parent="HUD/SelectDialog/VBoxContainer/MenuHeader"]
+layout_mode = 2
+text = "PART NAME"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="HUD/SelectDialog/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="HUD/SelectDialog/VBoxContainer"]
+layout_mode = 2
+text = "Press or click a hotbar slot."
+horizontal_alignment = 1
+
+[node name="SelectDialogCancel" type="Button" parent="HUD/SelectDialog/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+shortcut = SubResource("Shortcut_sp4rm")
+text = "CANCEL"
+
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button" to="HUD" method="_on_hotbar_button_pressed" binds= [0]]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button2" to="HUD" method="_on_hotbar_button_pressed" binds= [1]]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button3" to="HUD" method="_on_hotbar_button_pressed" binds= [2]]
@@ -398,3 +470,5 @@ columns = 8
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button9" to="HUD" method="_on_hotbar_button_pressed" binds= [8]]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button10" to="HUD" method="_on_hotbar_button_pressed" binds= [9]]
 [connection signal="toggled" from="HUD/ShowInventory" to="HUD" method="_on_show_inventory_toggled"]
+[connection signal="child_entered_tree" from="HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer" to="HUD" method="_on_grid_container_child_entered_tree"]
+[connection signal="pressed" from="HUD/SelectDialog/VBoxContainer/SelectDialogCancel" to="HUD" method="_on_select_dialog_cancel_pressed"]

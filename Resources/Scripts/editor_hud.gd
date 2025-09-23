@@ -1,13 +1,21 @@
 extends CanvasLayer
 
 const INVENTORY_BACKSTAGE = Vector2(1152.0, 0.0)
+const INVENTORY_PATH = ^"PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer"
 
-# part_id is the order of the part in parts.json
 signal selection_changed(part_id: int)
 
+var selected_inventory_part = null
+
 func _on_hotbar_button_pressed(idx: int) -> void:
-	pass
-	#selection_changed.emit(part_id)
+	var button = $Hotbar/HBoxContainer.get_child(idx) as Button
+	if (selected_inventory_part != null):
+		# we are picking a part from the inventory
+		$SelectDialog.hide()
+		button.icon = selected_inventory_part.icon.duplicate()
+	else:
+		pass
+		#selection_changed.emit(part_id)
 
 func _on_show_inventory_toggled(toggled_on: bool) -> void:
 	var tween = get_tree().create_tween()
@@ -17,4 +25,19 @@ func _on_show_inventory_toggled(toggled_on: bool) -> void:
 		tween.tween_property($PartInventory, "position", Vector2.ZERO, 0.25)
 	else:
 		$ShowInventory.text = "Show Inventory"
+		$SelectDialog.hide()
+		selected_inventory_part = null
 		tween.tween_property($PartInventory, "position", INVENTORY_BACKSTAGE, 0.25)
+
+func _on_inventory_button_pressed(idx: int):
+	selected_inventory_part = get_node(INVENTORY_PATH).get_child(idx)
+	$SelectDialog/VBoxContainer/MenuHeader/Label.text = selected_inventory_part.get_node("Label").text
+	$SelectDialog.show()
+
+func _on_grid_container_child_entered_tree(node: Node) -> void:
+	var button = node as Button
+	button.pressed.connect(_on_inventory_button_pressed.bind(button.get_index()))
+
+func _on_select_dialog_cancel_pressed() -> void:
+	$SelectDialog.hide()
+	selected_inventory_part = null
