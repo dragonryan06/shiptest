@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Godot;
 using Godot.Collections;
@@ -11,13 +13,13 @@ public partial class Editor : Node2D
 
     private readonly Color _validColor = new("#00ff00");
     private readonly Color _invalidColor = new("#ff0000");
-    private readonly Array _parts;
+    private readonly List<EditorPartInfo> _parts;
 
     private bool gridSnapping { get; set; }
     private bool canRotate { get; set; }
     private int rotationIdx { get; set; } = 0;
-    
-    private Dictionary selectedPart { get; set; }
+
+    private EditorPartInfo? selectedPart { get; set; }
 
     public Editor()
     {
@@ -25,11 +27,19 @@ public partial class Editor : Node2D
 
         return;
         
-        Array InitializeParts()
+        List<EditorPartInfo> InitializeParts()
         {
             var jsonString = FileAccess.Open("res://Resources/Scenes/Editor/parts.json", 
                 FileAccess.ModeFlags.Read).GetAsText();
-            return Json.ParseString(jsonString).As<Array>();
+            var array = Json.ParseString(jsonString).As<Array>();
+
+            var parts = new List<EditorPartInfo>();
+            foreach (var p in array)
+            {
+                parts.Add(new EditorPartInfo(p.AsGodotDictionary()));
+            }
+            
+            return parts;
         }
     }
 
@@ -38,14 +48,13 @@ public partial class Editor : Node2D
         var partInventoryItem = GD.Load<PackedScene>("res://Resources/Scenes/Editor/part_inventory_item.tscn");
         var grid = GetNode<GridContainer>(InventoryGridPath);
         
-        foreach (var p in _parts)
+        foreach (var part in _parts)
         {
-            var part = p.AsGodotDictionary();
             var inventoryItem = partInventoryItem.Instantiate<Button>();
             
-            inventoryItem.GetNode<Label>("Label").Text = part["name"].AsString();
-            inventoryItem.Icon = GD.Load<CompressedTexture2D>(part["icon"].AsString());
-            inventoryItem.SetMeta("part_id", part["id"].AsInt32());
+            inventoryItem.GetNode<Label>("Label").Text = part.Name;
+            inventoryItem.Icon = part.Icon.Duplicate() as Texture2D;
+            inventoryItem.SetMeta("part_id", part.Id);
             
             grid.AddChild(inventoryItem);
         }
@@ -73,13 +82,27 @@ public partial class Editor : Node2D
 
     public override void _Input(InputEvent @event)
     {
-        if (Input.IsActionJustPressed("editor_rotate") && canRotate)
+        if (Input.IsActionJustPressed("editor_rotate") && selectedPart != null && canRotate)
         {
             if (++rotationIdx == 4)
             {
                 rotationIdx = 0;
             }
-            GetNode<Sprite2D>("PlacementPreview").RotationDegrees = rotationIdx * 90.0f;
+
+            var preview = GetNode<Sprite2D>("PlacementPreview");
+            if (selectedPart.Value.Tags.Contains("tile"))
+            {
+                var atlas = preview.Texture as AtlasTexture;
+                Debug.Assert(atlas != null, "Tile parts must have an AtlasTexture icon!!");
+                atlas.Region = new Rect2(32*selectedPart.Value.Orientations[rotationIdx], 32*Vector2.One);
+            }
+            else
+            {
+                GetNode<Sprite2D>("PlacementPreview").RotationDegrees = rotationIdx * 90.0f;
+            }
+        } else if (@event is InputEventMouseButton { Pressed: true } mouseButton)
+        {
+            return;
         }
     }
 
@@ -96,22 +119,19 @@ public partial class Editor : Node2D
             selectedPart = null;
             return;
         }
-        
-        selectedPart = _parts[partId].AsGodotDictionary();
+
+        selectedPart = _parts[partId];
 
         preview.Modulate = _validColor;
-        preview.Texture = GD.Load<CompressedTexture2D>(selectedPart["icon"].AsString());
+        preview.Texture = selectedPart.Value.Icon.Duplicate() as Texture2D;
         preview.Show();
 
-        switch (selectedPart["tags"].AsStringArray()[0])
+        if (selectedPart.Value.Tags.Contains("tile"))
         {
-            case "tile_floor":
-            case "tile_wall":
-                gridSnapping = true;
-                break;
+            gridSnapping = true;
         }
 
-        if (selectedPart["tags"].AsStringArray().Contains("can_rotate"))
+        if (selectedPart.Value.Tags.Contains("can_rotate"))
         {
             canRotate = true;
         }

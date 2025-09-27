@@ -2,18 +2,29 @@
 	{
 		"id" : 0,
 		"name" : "Lattice",
-		"icon" : "res://Resources/Textures/Icons/lattice.png",
+		"icon" : "res://Resources/Textures/Tiles/lattice.png",
+		"source_id" : 0,
+		"atlas_pos" : [0, 0],
 		"tags" : [
-			"tile_floor"
+			"tile",
+			"layer_floor"
 		]
 	},
 	
 	{
 		"id" : 1,
 		"name" : "Angled Lattice",
-		"icon" : "res://Resources/Textures/Icons/lattice_angled.png",
+		"icon" : "res://Resources/Textures/Tiles/lattice.png",
+		"source_id" : 0,
+		"orientations" : [
+			[1, 0],
+			[2, 0],
+			[2, 1],
+			[1, 1]
+		],
 		"tags" : [
-			"tile_floor",
+			"tile",
+			"layer_floor",
 			"can_rotate"
 		]
 	},
@@ -21,18 +32,29 @@
 	{
 		"id" : 2,
 		"name" : "Plating",
-		"icon" : "res://Resources/Textures/Icons/plating.png",
+		"icon" : "res://Resources/Textures/Tiles/plating.png",
+		"source_id" : 1,
+		"atlas_pos" : [0, 0],
 		"tags" : [
-			"tile_floor"
+			"tile",
+			"layer_floor"
 		]
 	},
 	
 	{
 		"id" : 3,
 		"name" : "Angled Plating",
-		"icon" : "res://Resources/Textures/Icons/plating_angled.png",
+		"icon" : "res://Resources/Textures/Tiles/plating.png",
+		"source_id" : 0,
+		"orientations" : [
+			[1, 0],
+			[2, 0],
+			[2, 1],
+			[1, 1]
+		],
 		"tags" : [
-			"tile_floor",
+			"tile",
+			"layer_floor",
 			"can_rotate"
 		]
 	},
@@ -40,18 +62,24 @@
 	{
 		"id" : 4,
 		"name" : "Wall",
-		"icon" : "res://Resources/Textures/Icons/wall.png",
+		"icon" : "res://Resources/Textures/Tiles/wall.png",
+		"source_id" : -1,
+		"atlas_pos" : [-1, -1],
 		"tags" : [
-			"tile_wall"
+			"tile",
+			"layer_wall"
 		]
 	},
 	
 	{
 		"id" : 5,
 		"name" : "Reinforced Wall",
-		"icon" : "res://Resources/Textures/Icons/r_wall.png",
+		"icon" : "res://Resources/Textures/Tiles/r_wall.png",
+		"source_id" : -1,
+		"atlas_pos" : [-1, -1],
 		"tags" : [
-			"tile_wall"
+			"tile",
+			"layer_wall"
 		]
 	}
 ]
