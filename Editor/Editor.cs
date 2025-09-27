@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Godot;
 using Godot.Collections;
 
@@ -100,9 +99,30 @@ public partial class Editor : Node2D
             {
                 GetNode<Sprite2D>("PlacementPreview").RotationDegrees = rotationIdx * 90.0f;
             }
-        } else if (@event is InputEventMouseButton { Pressed: true } mouseButton)
+        } else if (@event is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left })
         {
-            return;
+            if (selectedPart == null)
+            {
+                return;
+            }
+
+            TileMapLayer tileMap = null;
+            if (selectedPart.Value.Tags.Contains("layer_floor"))
+            {
+                tileMap = GetNode<TileMapLayer>("Floor");
+            } 
+            else if (selectedPart.Value.Tags.Contains("layer_wall"))
+            {
+                tileMap = GetNode<TileMapLayer>("Walls");
+            }
+            
+            Debug.Assert(tileMap != null, "Tried to place a tile without a layer tag!?");
+            tileMap.SetCell(
+                tileMap.LocalToMap(tileMap.GetLocalMousePosition()),
+                selectedPart.Value.SourceId,
+                selectedPart.Value.Tags.Contains("can_rotate")
+                    ? selectedPart.Value.Orientations[rotationIdx]
+                    : selectedPart.Value.AtlasPosition);
         }
     }
 

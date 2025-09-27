@@ -45,7 +45,7 @@
 		"id" : 3,
 		"name" : "Angled Plating",
 		"icon" : "res://Resources/Textures/Tiles/plating.png",
-		"source_id" : 0,
+		"source_id" : 1,
 		"orientations" : [
 			[1, 0],
 			[2, 0],
