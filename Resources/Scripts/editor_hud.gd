@@ -4,6 +4,7 @@ const INVENTORY_BACKSTAGE = Vector2(1152.0, 0.0)
 const INVENTORY_PATH = ^"PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer"
 
 signal selection_changed(part_id: int)
+var last_selection = -1
 
 var selected_inventory_part = null
 
@@ -13,9 +14,16 @@ func _on_hotbar_button_pressed(idx: int) -> void:
 		# we are picking a part from the inventory
 		$SelectDialog.hide()
 		button.icon = selected_inventory_part.icon.duplicate()
-	else:
-		pass
-		#selection_changed.emit(part_id)
+		button.set_meta("part_id", selected_inventory_part.get_meta("part_id"))
+		selected_inventory_part = null
+	elif (button.has_meta("part_id")):
+		var id = button.get_meta("part_id")
+		if (id == last_selection):
+			last_selection = -1
+			selection_changed.emit(-1)
+		else:
+			last_selection = id
+			selection_changed.emit(id)
 
 func _on_show_inventory_toggled(toggled_on: bool) -> void:
 	var tween = get_tree().create_tween()

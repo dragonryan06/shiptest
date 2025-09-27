@@ -111,6 +111,8 @@ tile_set = ExtResource("3_06x8c")
 
 [node name="Walls" type="TileMapLayer" parent="."]
 
+[node name="PlacementPreview" type="Sprite2D" parent="."]
+
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("4_sp4rm")
 
@@ -435,7 +437,6 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
-theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 8
 
 [node name="Label" type="Label" parent="HUD/SelectDialog/VBoxContainer/MenuHeader"]
