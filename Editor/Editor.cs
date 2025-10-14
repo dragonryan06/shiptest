@@ -17,6 +17,7 @@ public partial class Editor : Node2D
     private bool gridSnapping { get; set; }
     private bool canRotate { get; set; }
     private int rotationIdx { get; set; } = 0;
+    private bool  dragPlacing { get; set; }
 
     private EditorPartInfo? selectedPart { get; set; }
 
@@ -71,6 +72,36 @@ public partial class Editor : Node2D
         var preview = GetNode<Sprite2D>("PlacementPreview");
         preview.Position = GetGlobalMousePosition();
         
+        TileMapLayer tileMap = null;
+        if (selectedPart.Value.Tags.Contains("layer_floor"))
+        {
+            tileMap = GetNode<TileMapLayer>("Floor");
+        } 
+        else if (selectedPart.Value.Tags.Contains("layer_wall"))
+        {
+            tileMap = GetNode<TileMapLayer>("Walls");
+        }
+        Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
+
+        if (dragPlacing)
+        {
+            tileMap.SetCell(
+                tileMap.LocalToMap(tileMap.GetLocalMousePosition()),
+                selectedPart.Value.SourceId,
+                selectedPart.Value.Tags.Contains("can_rotate")
+                    ? selectedPart.Value.Orientations[rotationIdx]
+                    : selectedPart.Value.AtlasPosition);
+        }
+        
+        if (tileMap.GetCellSourceId(tileMap.LocalToMap(GetGlobalMousePosition())) != -1)
+        {
+            preview.Modulate = Colors.Red; // Actually dunno about doing it this way, i think overplacing should be a legal placement thing. What did I do in the previous ship editor? Maybe theres a preview tilemap that fills up and then a little animation shows the full mouse input get welded on...
+        }
+        else
+        {
+            preview.Modulate = Colors.Green;
+        }
+        
         if (gridSnapping)
         {
             preview.Position = new Vector2(
@@ -99,30 +130,19 @@ public partial class Editor : Node2D
             {
                 GetNode<Sprite2D>("PlacementPreview").RotationDegrees = rotationIdx * 90.0f;
             }
-        } else if (@event is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left })
+        }
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventMouseButton mouseButton)
         {
-            if (selectedPart == null)
+            if (selectedPart == null || mouseButton.ButtonIndex != MouseButton.Left)
             {
                 return;
             }
 
-            TileMapLayer tileMap = null;
-            if (selectedPart.Value.Tags.Contains("layer_floor"))
-            {
-                tileMap = GetNode<TileMapLayer>("Floor");
-            } 
-            else if (selectedPart.Value.Tags.Contains("layer_wall"))
-            {
-                tileMap = GetNode<TileMapLayer>("Walls");
-            }
-            
-            Debug.Assert(tileMap != null, "Tried to place a tile without a layer tag!?");
-            tileMap.SetCell(
-                tileMap.LocalToMap(tileMap.GetLocalMousePosition()),
-                selectedPart.Value.SourceId,
-                selectedPart.Value.Tags.Contains("can_rotate")
-                    ? selectedPart.Value.Orientations[rotationIdx]
-                    : selectedPart.Value.AtlasPosition);
+            dragPlacing = mouseButton.Pressed;
         }
     }
 
