@@ -109,9 +109,14 @@ script = ExtResource("2_sp4rm")
 [node name="Floor" type="TileMapLayer" parent="."]
 tile_set = ExtResource("3_06x8c")
 
+[node name="Preview" type="TileMapLayer" parent="Floor"]
+modulate = Color(0, 1, 0, 1)
+tile_set = ExtResource("3_06x8c")
+
 [node name="Walls" type="TileMapLayer" parent="."]
 
-[node name="PlacementPreview" type="Sprite2D" parent="."]
+[node name="Preview" type="TileMapLayer" parent="Walls"]
+modulate = Color(0, 1, 0, 1)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("4_sp4rm")

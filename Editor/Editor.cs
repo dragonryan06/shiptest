@@ -10,16 +10,46 @@ public partial class Editor : Node2D
     private const string InventoryGridPath =
         "HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer";
 
-    private readonly Color _validColor = new("#00ff00");
-    private readonly Color _invalidColor = new("#ff0000");
+    private readonly Color _placingColor = new("#00ff00");
+    private readonly Color _deletingColor = new("#ff0000");
     private readonly List<EditorPartInfo> _parts;
+    
+    private bool GridSnapping { get; set; }
+    private bool CanRotate { get; set; }
+    private int RotationIdx { get; set; }
+    private bool Dragging { get; set; }
 
-    private bool gridSnapping { get; set; }
-    private bool canRotate { get; set; }
-    private int rotationIdx { get; set; } = 0;
-    private bool  dragPlacing { get; set; }
+    private bool _deleting;
+    private bool Deleting
+    {
+        get => _deleting;
+        set
+        {
+            _deleting = value;
 
-    private EditorPartInfo? selectedPart { get; set; }
+            if (_deleting)
+            {
+                WorkingMap.GetNode<TileMapLayer>("Preview").Modulate = _deletingColor;
+            }
+            else
+            {
+                WorkingMap.GetNode<TileMapLayer>("Preview").Modulate = _placingColor;
+            }
+        }
+    }
+    
+    private TileMapLayer WorkingMap { get; set; }
+
+    private EditorPartInfo? _selectedPart;
+    private EditorPartInfo? SelectedPart
+    {
+        get => _selectedPart;
+        set
+        {
+            _selectedPart = value;
+            UpdateWorkingMap();
+        }
+    }
 
     public Editor()
     {
@@ -64,71 +94,45 @@ public partial class Editor : Node2D
 
     public override void _Process(double delta)
     {
-        if (selectedPart == null)
+        if (SelectedPart == null)
         {
             return;
         }
         
-        var preview = GetNode<Sprite2D>("PlacementPreview");
-        preview.Position = GetGlobalMousePosition();
+        var preview = WorkingMap.GetNode<TileMapLayer>("Preview");
         
-        TileMapLayer tileMap = null;
-        if (selectedPart.Value.Tags.Contains("layer_floor"))
+        if (!Dragging)
         {
-            tileMap = GetNode<TileMapLayer>("Floor");
-        } 
-        else if (selectedPart.Value.Tags.Contains("layer_wall"))
-        {
-            tileMap = GetNode<TileMapLayer>("Walls");
-        }
-        Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
-
-        if (dragPlacing)
-        {
-            tileMap.SetCell(
-                tileMap.LocalToMap(tileMap.GetLocalMousePosition()),
-                selectedPart.Value.SourceId,
-                selectedPart.Value.Tags.Contains("can_rotate")
-                    ? selectedPart.Value.Orientations[rotationIdx]
-                    : selectedPart.Value.AtlasPosition);
+            preview.Clear();
         }
         
-        if (tileMap.GetCellSourceId(tileMap.LocalToMap(GetGlobalMousePosition())) != -1)
-        {
-            preview.Modulate = Colors.Red; // Actually dunno about doing it this way, i think overplacing should be a legal placement thing. What did I do in the previous ship editor? Maybe theres a preview tilemap that fills up and then a little animation shows the full mouse input get welded on...
-        }
-        else
-        {
-            preview.Modulate = Colors.Green;
-        }
-        
-        if (gridSnapping)
-        {
-            preview.Position = new Vector2(
-                Mathf.Snapped(preview.Position.X + 16, 32) - 16,
-                Mathf.Snapped(preview.Position.Y + 16, 32) - 16);
-        }
+        preview.SetCell(
+            preview.LocalToMap(preview.GetLocalMousePosition()),
+            SelectedPart.Value.SourceId,
+            SelectedPart.Value.Tags.Contains("can_rotate")
+                ? SelectedPart.Value.Orientations[RotationIdx]
+                : SelectedPart.Value.AtlasPosition);
     }
 
     public override void _Input(InputEvent @event)
     {
-        if (Input.IsActionJustPressed("editor_rotate") && selectedPart != null && canRotate)
+        if (Input.IsActionJustPressed("editor_rotate") && SelectedPart != null && CanRotate)
         {
-            if (++rotationIdx == 4)
+            if (++RotationIdx == 4)
             {
-                rotationIdx = 0;
+                RotationIdx = 0;
             }
 
             var preview = GetNode<Sprite2D>("PlacementPreview");
-            if (selectedPart.Value.Tags.Contains("tile"))
+            if (SelectedPart.Value.Tags.Contains("tile"))
             {
                 var atlas = preview.Texture as AtlasTexture;
                 Debug.Assert(atlas != null, "Tile parts must have an AtlasTexture icon!!");
-                atlas.Region = new Rect2(32*selectedPart.Value.Orientations[rotationIdx], 32*Vector2.One);
+                atlas.Region = new Rect2(32*SelectedPart.Value.Orientations[RotationIdx], 32*Vector2.One);
             }
             else
             {
-                GetNode<Sprite2D>("PlacementPreview").RotationDegrees = rotationIdx * 90.0f;
+                GetNode<Sprite2D>("PlacementPreview").RotationDegrees = RotationIdx * 90.0f;
             }
         }
     }
@@ -137,43 +141,91 @@ public partial class Editor : Node2D
     {
         if (@event is InputEventMouseButton mouseButton)
         {
-            if (selectedPart == null || mouseButton.ButtonIndex != MouseButton.Left)
+            if (SelectedPart == null)
             {
                 return;
             }
 
-            dragPlacing = mouseButton.Pressed;
+            Deleting = mouseButton.ButtonIndex == MouseButton.Right;
+
+            if (mouseButton.Pressed)
+            {
+                Dragging = true;
+            }
+            else
+            {
+                Dragging = false;
+
+                var preview = WorkingMap.GetNode<TileMapLayer>("Preview");
+                if (preview.TileMapData.IsEmpty())
+                {
+                    return;
+                }
+                
+                // I would love to eventually have a like fly-in and then weld on animation here!
+                foreach (var cell in preview.GetUsedCells())
+                {
+                    if (Deleting)
+                    {
+                        WorkingMap.EraseCell(cell);
+                    }
+                    else
+                    {
+                        WorkingMap.SetCell(cell, 
+                            preview.GetCellSourceId(cell), 
+                            preview.GetCellAtlasCoords(cell), 
+                            preview.GetCellAlternativeTile(cell));
+                    }
+                }
+                preview.Clear();
+            }
         }
     }
 
     public void SelectionChanged(int partId)
     {
-        var preview = GetNode<Sprite2D>("PlacementPreview");
-        gridSnapping = false;
-        canRotate = false;
-        rotationIdx = 0;
+        GridSnapping = false;
+        CanRotate = false;
+        RotationIdx = 0;
         
         if (partId == -1)
         {
-            preview.Hide();
-            selectedPart = null;
+            SelectedPart = null;
             return;
         }
 
-        selectedPart = _parts[partId];
+        SelectedPart = _parts[partId];
 
-        preview.Modulate = _validColor;
-        preview.Texture = selectedPart.Value.Icon.Duplicate() as Texture2D;
-        preview.Show();
-
-        if (selectedPart.Value.Tags.Contains("tile"))
+        if (SelectedPart.Value.Tags.Contains("tile"))
         {
-            gridSnapping = true;
+            GridSnapping = true;
         }
 
-        if (selectedPart.Value.Tags.Contains("can_rotate"))
+        if (SelectedPart.Value.Tags.Contains("can_rotate"))
         {
-            canRotate = true;
+            CanRotate = true;
         }
+    }
+
+    private void UpdateWorkingMap()
+    {
+        if (SelectedPart == null || !SelectedPart.Value.Tags.Contains("tile"))
+        {
+            WorkingMap = null;
+            return;
+        }
+        
+        TileMapLayer tileMap = null;
+        if (SelectedPart.Value.Tags.Contains("layer_floor"))
+        {
+            tileMap = GetNode<TileMapLayer>("Floor");
+        } 
+        else if (SelectedPart.Value.Tags.Contains("layer_wall"))
+        {
+            tileMap = GetNode<TileMapLayer>("Walls");
+        }
+        Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
+
+        WorkingMap = tileMap;
     }
 }
