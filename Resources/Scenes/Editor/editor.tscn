@@ -1,9 +1,19 @@
-[gd_scene load_steps=29 format=3 uid="uid://cdrvglcjb21bd"]
+[gd_scene load_steps=32 format=3 uid="uid://cdrvglcjb21bd"]
 
 [ext_resource type="Script" uid="uid://cqqlh42oncn64" path="res://Editor/Editor.cs" id="1_jlxre"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_sp4rm"]
 [ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="3_06x8c"]
+[ext_resource type="Texture2D" uid="uid://ofs0fw4nlywb" path="res://Resources/Textures/Tiles/tile_highlight.png" id="3_sp4rm"]
 [ext_resource type="Script" uid="uid://37do7kmfj2sn" path="res://Resources/Scripts/editor_hud.gd" id="4_sp4rm"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_06x8c"]
+texture = ExtResource("3_sp4rm")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_ofvp3"]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_06x8c")
 
 [sub_resource type="InputEventKey" id="InputEventKey_8ba6r"]
 device = -1
@@ -117,6 +127,10 @@ tile_set = ExtResource("3_06x8c")
 
 [node name="Preview" type="TileMapLayer" parent="Walls"]
 modulate = Color(0, 1, 0, 1)
+
+[node name="DeletePreview" type="TileMapLayer" parent="."]
+modulate = Color(1, 0, 0, 1)
+tile_set = SubResource("TileSet_ofvp3")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("4_sp4rm")

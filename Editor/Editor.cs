@@ -29,11 +29,16 @@ public partial class Editor : Node2D
 
             if (_deleting)
             {
-                WorkingMap.GetNode<TileMapLayer>("Preview").Modulate = _deletingColor;
+                if (WorkingMap == null)
+                {
+                    return;
+                }
+                
+                WorkingMap.GetNode<TileMapLayer>("Preview").Clear();
             }
             else
             {
-                WorkingMap.GetNode<TileMapLayer>("Preview").Modulate = _placingColor;
+                GetNode<TileMapLayer>("DeletePreview").Clear();
             }
         }
     }
@@ -98,12 +103,20 @@ public partial class Editor : Node2D
         {
             return;
         }
-        
-        var preview = WorkingMap.GetNode<TileMapLayer>("Preview");
+
+        var preview = Deleting
+                ? GetNode<TileMapLayer>("DeletePreview")
+                : WorkingMap.GetNode<TileMapLayer>("Preview");
         
         if (!Dragging)
         {
             preview.Clear();
+        }
+
+        if (Deleting)
+        {
+            preview.SetCell(preview.LocalToMap(preview.GetLocalMousePosition()), 0, Vector2I.Zero);
+            return;
         }
         
         preview.SetCell(
@@ -123,31 +136,21 @@ public partial class Editor : Node2D
                 RotationIdx = 0;
             }
 
-            var preview = GetNode<Sprite2D>("PlacementPreview");
-            if (SelectedPart.Value.Tags.Contains("tile"))
-            {
-                var atlas = preview.Texture as AtlasTexture;
-                Debug.Assert(atlas != null, "Tile parts must have an AtlasTexture icon!!");
-                atlas.Region = new Rect2(32*SelectedPart.Value.Orientations[RotationIdx], 32*Vector2.One);
-            }
-            else
-            {
-                GetNode<Sprite2D>("PlacementPreview").RotationDegrees = RotationIdx * 90.0f;
-            }
+            // Insert logic for non-tile parts
         }
     }
 
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (@event is InputEventMouseButton mouseButton)
+        if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Left or MouseButton.Right } mouseButton) 
         {
-            if (SelectedPart == null)
+            Deleting = mouseButton.ButtonIndex == MouseButton.Right;
+
+            if (!Deleting && SelectedPart == null)
             {
                 return;
             }
-
-            Deleting = mouseButton.ButtonIndex == MouseButton.Right;
-
+            
             if (mouseButton.Pressed)
             {
                 Dragging = true;
@@ -156,7 +159,9 @@ public partial class Editor : Node2D
             {
                 Dragging = false;
 
-                var preview = WorkingMap.GetNode<TileMapLayer>("Preview");
+                var preview = Deleting
+                        ? GetNode<TileMapLayer>("DeletePreview")
+                        : WorkingMap.GetNode<TileMapLayer>("Preview");
                 if (preview.TileMapData.IsEmpty())
                 {
                     return;
@@ -178,6 +183,11 @@ public partial class Editor : Node2D
                     }
                 }
                 preview.Clear();
+
+                if (Deleting)
+                {
+                    Deleting = false;
+                }
             }
         }
     }
@@ -190,6 +200,10 @@ public partial class Editor : Node2D
         
         if (partId == -1)
         {
+            var preview = Deleting
+                ? GetNode<TileMapLayer>("DeletePreview")
+                : WorkingMap.GetNode<TileMapLayer>("Preview");
+            preview.Clear();
             SelectedPart = null;
             return;
         }
