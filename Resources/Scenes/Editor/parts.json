@@ -63,10 +63,11 @@
 		"id" : 4,
 		"name" : "Wall",
 		"icon" : "res://Resources/Textures/Tiles/wall.png",
-		"source_id" : -1,
-		"atlas_pos" : [-1, -1],
+		"source_id" : 0,
+		"atlas_pos" : [6, 3],
 		"tags" : [
 			"tile",
+			"terrain",
 			"layer_wall"
 		]
 	},

@@ -36,6 +36,12 @@ public struct EditorPartInfo
                 var pos = godotDict["atlas_pos"].AsGodotArray();
                 AtlasPosition = new Vector2I(pos[0].AsInt32(), pos[1].AsInt32());
             }
+
+            if (Tags.Contains("terrain"))
+            {
+                // In the future we can support multiple terrains on one set... if necessary
+                Terrain = 0;
+            }
         }
     }
 
@@ -52,6 +58,8 @@ public struct EditorPartInfo
     public int SourceId { get; } = -1;
 
     public Vector2I AtlasPosition { get; } = -Vector2I.One;
+
+    public int Terrain { get; } = -1;
     
     /// Will be empty if this isn't tagged can_rotate.
     public List<Vector2I> Orientations { get; } = [];

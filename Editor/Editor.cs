@@ -125,6 +125,11 @@ public partial class Editor : Node2D
             SelectedPart.Value.Tags.Contains("can_rotate")
                 ? SelectedPart.Value.Orientations[RotationIdx]
                 : SelectedPart.Value.AtlasPosition);
+        
+        if (SelectedPart.Value.Terrain != -1)
+        {
+            preview.SetCellsTerrainConnect(preview.GetUsedCells(), SelectedPart.Value.Terrain, 0);
+        }
     }
 
     public override void _Input(InputEvent @event)
@@ -162,7 +167,7 @@ public partial class Editor : Node2D
                 var preview = Deleting
                         ? GetNode<TileMapLayer>("DeletePreview")
                         : WorkingMap.GetNode<TileMapLayer>("Preview");
-                if (preview.TileMapData.IsEmpty())
+                if (preview.TileMapData.IsEmpty() || SelectedPart == null)
                 {
                     return;
                 }
@@ -181,6 +186,11 @@ public partial class Editor : Node2D
                             preview.GetCellAtlasCoords(cell), 
                             preview.GetCellAlternativeTile(cell));
                     }
+                }
+                
+                if (SelectedPart.Value.Terrain != -1)
+                {
+                    WorkingMap.SetCellsTerrainConnect(WorkingMap.GetUsedCells(), SelectedPart.Value.Terrain, 0, false);
                 }
                 preview.Clear();
 
