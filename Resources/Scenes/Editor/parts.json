@@ -73,7 +73,7 @@
 	},
 	
 	{
-		"id" : 5,
+		"id" : -1,
 		"name" : "Reinforced Wall",
 		"icon" : "res://Resources/Textures/Tiles/r_wall.png",
 		"source_id" : -1,

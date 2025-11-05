@@ -71,6 +71,12 @@ public partial class Editor : Node2D
             var parts = new List<EditorPartInfo>();
             foreach (var p in array)
             {
+                if (!p.AsGodotDictionary().TryGetValue("id", out var id) || id.AsInt32() == -1)
+                {
+                    // Giving a part id "-1" is the ideal way to have it ignored.
+                    continue;
+                }
+                
                 parts.Add(new EditorPartInfo(p.AsGodotDictionary()));
             }
             
@@ -177,6 +183,12 @@ public partial class Editor : Node2D
                 {
                     if (Deleting)
                     {
+                        if (SelectedPart.Value.Terrain != -1)
+                        {
+                            WorkingMap.SetCellsTerrainConnect([cell], SelectedPart.Value.Terrain, -1);
+                            continue;
+                        }
+                        
                         WorkingMap.EraseCell(cell);
                     }
                     else
@@ -190,7 +202,7 @@ public partial class Editor : Node2D
                 
                 if (SelectedPart.Value.Terrain != -1)
                 {
-                    WorkingMap.SetCellsTerrainConnect(WorkingMap.GetUsedCells(), SelectedPart.Value.Terrain, 0, false);
+                    WorkingMap.SetCellsTerrainConnect(WorkingMap.GetUsedCells(), SelectedPart.Value.Terrain, 0);
                 }
                 preview.Clear();
 
@@ -207,13 +219,17 @@ public partial class Editor : Node2D
         GridSnapping = false;
         CanRotate = false;
         RotationIdx = 0;
-        
-        if (partId == -1)
+
+        if (SelectedPart != null)
         {
             var preview = Deleting
                 ? GetNode<TileMapLayer>("DeletePreview")
                 : WorkingMap.GetNode<TileMapLayer>("Preview");
             preview.Clear();
+        }
+        
+        if (partId == -1)
+        {
             SelectedPart = null;
             return;
         }
