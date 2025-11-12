@@ -5,6 +5,7 @@ const INVENTORY_PATH := ^"PartInventory/PanelContainer/VBoxContainer/ScrollConta
 
 signal name_changed(new_name: String)
 signal selection_changed(part_id: int)
+signal new_file
 signal open_file(filename: String)
 signal save_file(filename: String)
 
@@ -16,19 +17,26 @@ var selected_inventory_part : Button
 func _ready() -> void:
 	var popup : PopupMenu = $FileMenu.get_popup()
 	
+	var new_shortcut := Shortcut.new()
+	var new_key := InputEventKey.new()
+	new_key.ctrl_pressed = true
+	new_key.keycode = KEY_N
+	new_shortcut.events.append(new_key)
+	popup.set_item_shortcut(0, new_shortcut)
+	
 	var open_shortcut := Shortcut.new()
 	var open_key := InputEventKey.new()
 	open_key.ctrl_pressed = true
 	open_key.keycode = KEY_O
 	open_shortcut.events.append(open_key)
-	popup.set_item_shortcut(0, open_shortcut)
+	popup.set_item_shortcut(1, open_shortcut)
 	
 	var save_shortcut := Shortcut.new()
 	var save_key := InputEventKey.new()
 	save_key.ctrl_pressed = true
 	save_key.keycode = KEY_S
 	save_shortcut.events.append(save_key)
-	popup.set_item_shortcut(1, save_shortcut)
+	popup.set_item_shortcut(2, save_shortcut)
 	
 	var save_as_shortcut := Shortcut.new()
 	var save_as_key := InputEventKey.new()
@@ -36,7 +44,7 @@ func _ready() -> void:
 	save_as_key.ctrl_pressed = true
 	save_as_key.keycode = KEY_S
 	save_as_shortcut.events.append(save_as_key)
-	popup.set_item_shortcut(2, save_as_shortcut)
+	popup.set_item_shortcut(3, save_as_shortcut)
 	
 	popup.id_pressed.connect(_on_filemenu_id_pressed)
 
@@ -88,6 +96,10 @@ func _on_name_box_text_submitted(new_text: String) -> void:
 func _on_filemenu_id_pressed(id: int) -> void:
 	match id:
 		0:
+			# New...
+			last_filename = ""
+			new_file.emit()
+		1:
 			# Open...
 			var file_dialog = FileDialog.new()
 			get_viewport().add_child(file_dialog)
@@ -96,18 +108,18 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			file_dialog.current_path = ProjectSettings.globalize_path("user://")
 			file_dialog.popup_centered()
 			
-			await file_dialog.confirmed
+			await file_dialog.file_selected
 			var filename = file_dialog.current_file
 			last_filename = filename
 			open_file.emit(filename)
-		1:
+		2:
 			# Save
 			if (last_filename.is_empty()):
-				_on_filemenu_id_pressed(2)
+				_on_filemenu_id_pressed(3)
 				return
 			
 			save_file.emit(last_filename)
-		2:
+		3:
 			# Save As...
 			var file_dialog = FileDialog.new()
 			get_viewport().add_child(file_dialog)
@@ -116,7 +128,7 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			file_dialog.current_path = ProjectSettings.globalize_path("user://")
 			file_dialog.popup_centered()
 			
-			await file_dialog.confirmed
+			await file_dialog.file_selected
 			var filename = file_dialog.current_file
 			last_filename = filename
 			save_file.emit(filename)

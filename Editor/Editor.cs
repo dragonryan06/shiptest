@@ -119,6 +119,7 @@ public partial class Editor : Node2D
         var hud = GetNode<CanvasLayer>("HUD");
         hud.Connect("selection_changed", new Callable(this, MethodName.OnSelectionChanged));
         hud.Connect("name_changed", new Callable(this, MethodName.OnNameChanged));
+        hud.Connect("new_file", new Callable(this, MethodName.OnFileNew));
         hud.Connect("open_file", new Callable(this, MethodName.OnFileOpen));
         hud.Connect("save_file", new Callable(this, MethodName.OnFileSave));
     }
@@ -294,6 +295,11 @@ public partial class Editor : Node2D
         Blueprint.Name = newName;
     }
 
+    private void OnFileNew()
+    {
+        GD.Print("Pretend I just made a new, empty file!!!");
+    }
+    
     private void OnFileOpen(string fileName)
     {
         GD.Print($"Pretend I just opened the blueprint from {fileName}!!!");
