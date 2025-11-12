@@ -482,6 +482,22 @@ size_flags_vertical = 4
 shortcut = SubResource("Shortcut_sp4rm")
 text = "CANCEL"
 
+[node name="NameBox" type="LineEdit" parent="HUD"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -63.0
+offset_right = 63.0
+offset_bottom = 42.0
+grow_horizontal = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 24
+placeholder_text = "Unnamed Ship"
+alignment = 1
+max_length = 30
+expand_to_text_length = true
+
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button" to="HUD" method="_on_hotbar_button_pressed" binds= [0]]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button2" to="HUD" method="_on_hotbar_button_pressed" binds= [1]]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button3" to="HUD" method="_on_hotbar_button_pressed" binds= [2]]
@@ -495,3 +511,4 @@ text = "CANCEL"
 [connection signal="toggled" from="HUD/ShowInventory" to="HUD" method="_on_show_inventory_toggled"]
 [connection signal="child_entered_tree" from="HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer" to="HUD" method="_on_grid_container_child_entered_tree"]
 [connection signal="pressed" from="HUD/SelectDialog/VBoxContainer/SelectDialogCancel" to="HUD" method="_on_select_dialog_cancel_pressed"]
+[connection signal="text_submitted" from="HUD/NameBox" to="HUD" method="_on_name_box_text_submitted"]

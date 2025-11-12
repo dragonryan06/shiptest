@@ -3,6 +3,7 @@ extends CanvasLayer
 const INVENTORY_BACKSTAGE = Vector2(1152.0, 0.0)
 const INVENTORY_PATH = ^"PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer"
 
+signal name_changed(new_name: String)
 signal selection_changed(part_id: int)
 var last_selection = -1
 
@@ -49,3 +50,6 @@ func _on_grid_container_child_entered_tree(node: Node) -> void:
 func _on_select_dialog_cancel_pressed() -> void:
 	$SelectDialog.hide()
 	selected_inventory_part = null
+
+func _on_name_box_text_submitted(new_text: String) -> void:
+	name_changed.emit(new_text)

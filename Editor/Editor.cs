@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Godot;
-using Godot.Collections;
+using ShipTest.Grids;
+using ShipTest.Serialization;
+using Array = Godot.Collections.Array;
 
 namespace ShipTest.Editor;
 
@@ -55,9 +59,11 @@ public partial class Editor : Node2D
             UpdateWorkingMap();
         }
     }
+    
+    public ShipBlueprint Blueprint { get; set; }
 
     public Editor()
-    {
+    { 
         _parts = InitializeParts();
 
         return;
@@ -100,7 +106,19 @@ public partial class Editor : Node2D
             grid.AddChild(inventoryItem);
         }
 
-        GetNode<CanvasLayer>("HUD").Connect("selection_changed", new Callable(this, MethodName.SelectionChanged));
+        Blueprint = new ShipBlueprint
+        {
+            Name = "Unnamed Ship",
+            GridLayers = new Dictionary<string, TileMapLayer>()
+        };
+        foreach (var layer in Enum.GetNames(typeof(LayerNames)))
+        {
+            Blueprint.GridLayers[layer] = GetNode<TileMapLayer>(layer);
+        }
+
+        var hud = GetNode<CanvasLayer>("HUD");
+        hud.Connect("selection_changed", new Callable(this, MethodName.OnSelectionChanged));
+        hud.Connect("name_changed", new Callable(this, MethodName.OnNameChanged));
     }
 
     public override void _Process(double delta)
@@ -214,7 +232,7 @@ public partial class Editor : Node2D
         }
     }
 
-    public void SelectionChanged(int partId)
+    private void OnSelectionChanged(int partId)
     {
         GridSnapping = false;
         CanRotate = false;
@@ -245,6 +263,11 @@ public partial class Editor : Node2D
         {
             CanRotate = true;
         }
+    }
+
+    private void OnNameChanged(string newName)
+    {
+        Blueprint.Name = newName;
     }
 
     private void UpdateWorkingMap()
