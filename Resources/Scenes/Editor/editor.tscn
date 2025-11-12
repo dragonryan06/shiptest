@@ -138,6 +138,19 @@ tile_set = SubResource("TileSet_ofvp3")
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("4_sp4rm")
 
+[node name="FileMenu" type="MenuButton" parent="HUD"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "File"
+flat = false
+item_count = 3
+popup/item_0/text = "Open..."
+popup/item_0/id = 0
+popup/item_1/text = "Save"
+popup/item_1/id = 1
+popup/item_2/text = "Save As..."
+popup/item_2/id = 2
+
 [node name="Hotbar" type="MarginContainer" parent="HUD"]
 anchors_preset = 7
 anchor_left = 0.5
@@ -486,8 +499,8 @@ text = "CANCEL"
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -63.0
-offset_right = 63.0
+offset_left = -89.5
+offset_right = 89.5
 offset_bottom = 42.0
 grow_horizontal = 2
 size_flags_horizontal = 4

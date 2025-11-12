@@ -119,6 +119,8 @@ public partial class Editor : Node2D
         var hud = GetNode<CanvasLayer>("HUD");
         hud.Connect("selection_changed", new Callable(this, MethodName.OnSelectionChanged));
         hud.Connect("name_changed", new Callable(this, MethodName.OnNameChanged));
+        hud.Connect("open_file", new Callable(this, MethodName.OnFileOpen));
+        hud.Connect("save_file", new Callable(this, MethodName.OnFileSave));
     }
 
     public override void _Process(double delta)
@@ -231,6 +233,28 @@ public partial class Editor : Node2D
             }
         }
     }
+    
+    private void UpdateWorkingMap()
+    {
+        if (SelectedPart == null || !SelectedPart.Value.Tags.Contains("tile"))
+        {
+            WorkingMap = null;
+            return;
+        }
+        
+        TileMapLayer tileMap = null;
+        if (SelectedPart.Value.Tags.Contains("layer_floor"))
+        {
+            tileMap = GetNode<TileMapLayer>("Floor");
+        } 
+        else if (SelectedPart.Value.Tags.Contains("layer_wall"))
+        {
+            tileMap = GetNode<TileMapLayer>("Walls");
+        }
+        Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
+
+        WorkingMap = tileMap;
+    }
 
     private void OnSelectionChanged(int partId)
     {
@@ -270,25 +294,13 @@ public partial class Editor : Node2D
         Blueprint.Name = newName;
     }
 
-    private void UpdateWorkingMap()
+    private void OnFileOpen(string fileName)
     {
-        if (SelectedPart == null || !SelectedPart.Value.Tags.Contains("tile"))
-        {
-            WorkingMap = null;
-            return;
-        }
-        
-        TileMapLayer tileMap = null;
-        if (SelectedPart.Value.Tags.Contains("layer_floor"))
-        {
-            tileMap = GetNode<TileMapLayer>("Floor");
-        } 
-        else if (SelectedPart.Value.Tags.Contains("layer_wall"))
-        {
-            tileMap = GetNode<TileMapLayer>("Walls");
-        }
-        Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
+        GD.Print($"Pretend I just opened the blueprint from {fileName}!!!");
+    }
 
-        WorkingMap = tileMap;
+    private void OnFileSave(string fileName)
+    {
+        GD.Print($"Pretend I just saved the blueprint to {fileName}!!!");
     }
 }
