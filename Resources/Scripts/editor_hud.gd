@@ -1,12 +1,52 @@
 extends CanvasLayer
 
-const INVENTORY_BACKSTAGE = Vector2(1152.0, 0.0)
-const INVENTORY_PATH = ^"PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer"
+const INVENTORY_BACKSTAGE := Vector2(1152.0, 0.0)
+const INVENTORY_PATH := ^"PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer"
 
+signal name_changed(new_name: String)
 signal selection_changed(part_id: int)
-var last_selection = -1
+signal new_file
+signal open_file(filename: String)
+signal save_file(filename: String)
 
-var selected_inventory_part = null
+var last_selection := -1
+var last_filename : String
+
+var selected_inventory_part : Button
+
+func _ready() -> void:
+	var popup : PopupMenu = $FileMenu.get_popup()
+	
+	var new_shortcut := Shortcut.new()
+	var new_key := InputEventKey.new()
+	new_key.ctrl_pressed = true
+	new_key.keycode = KEY_N
+	new_shortcut.events.append(new_key)
+	popup.set_item_shortcut(0, new_shortcut)
+	
+	var open_shortcut := Shortcut.new()
+	var open_key := InputEventKey.new()
+	open_key.ctrl_pressed = true
+	open_key.keycode = KEY_O
+	open_shortcut.events.append(open_key)
+	popup.set_item_shortcut(1, open_shortcut)
+	
+	var save_shortcut := Shortcut.new()
+	var save_key := InputEventKey.new()
+	save_key.ctrl_pressed = true
+	save_key.keycode = KEY_S
+	save_shortcut.events.append(save_key)
+	popup.set_item_shortcut(2, save_shortcut)
+	
+	var save_as_shortcut := Shortcut.new()
+	var save_as_key := InputEventKey.new()
+	save_as_key.shift_pressed = true
+	save_as_key.ctrl_pressed = true
+	save_as_key.keycode = KEY_S
+	save_as_shortcut.events.append(save_as_key)
+	popup.set_item_shortcut(3, save_as_shortcut)
+	
+	popup.id_pressed.connect(_on_filemenu_id_pressed)
 
 func _on_hotbar_button_pressed(idx: int) -> void:
 	var button = $Hotbar/HBoxContainer.get_child(idx) as Button
@@ -49,3 +89,48 @@ func _on_grid_container_child_entered_tree(node: Node) -> void:
 func _on_select_dialog_cancel_pressed() -> void:
 	$SelectDialog.hide()
 	selected_inventory_part = null
+
+func _on_name_box_text_submitted(new_text: String) -> void:
+	name_changed.emit(new_text)
+
+func _on_filemenu_id_pressed(id: int) -> void:
+	match id:
+		0:
+			# New...
+			last_filename = ""
+			new_file.emit()
+		1:
+			# Open...
+			var file_dialog = FileDialog.new()
+			get_viewport().add_child(file_dialog)
+			file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+			file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+			file_dialog.add_filter("*.json", "JSON files")
+			file_dialog.current_path = ProjectSettings.globalize_path("user://")
+			file_dialog.popup_centered()
+			
+			await file_dialog.file_selected
+			var filename = file_dialog.current_path
+			last_filename = filename
+			open_file.emit(filename)
+		2:
+			# Save
+			if (last_filename.is_empty()):
+				_on_filemenu_id_pressed(3)
+				return
+			
+			save_file.emit(last_filename)
+		3:
+			# Save As...
+			var file_dialog = FileDialog.new()
+			get_viewport().add_child(file_dialog)
+			file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+			file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+			file_dialog.add_filter("*.json", "JSON files")
+			file_dialog.current_path = ProjectSettings.globalize_path("user://")
+			file_dialog.popup_centered()
+			
+			await file_dialog.file_selected
+			var filename = file_dialog.current_path
+			last_filename = filename
+			save_file.emit(filename)

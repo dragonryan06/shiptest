@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
-using Godot.Collections;
+using ShipTest.Grids;
+using ShipTest.Serialization;
+using Array = Godot.Collections.Array;
 
 namespace ShipTest.Editor;
 
@@ -55,9 +58,11 @@ public partial class Editor : Node2D
             UpdateWorkingMap();
         }
     }
+    
+    public ShipBlueprint Blueprint { get; set; }
 
     public Editor()
-    {
+    { 
         _parts = InitializeParts();
 
         return;
@@ -100,7 +105,14 @@ public partial class Editor : Node2D
             grid.AddChild(inventoryItem);
         }
 
-        GetNode<CanvasLayer>("HUD").Connect("selection_changed", new Callable(this, MethodName.SelectionChanged));
+        NewDocument();
+
+        var hud = GetNode<CanvasLayer>("HUD");
+        hud.Connect("selection_changed", new Callable(this, MethodName.OnSelectionChanged));
+        hud.Connect("name_changed", new Callable(this, MethodName.OnNameChanged));
+        hud.Connect("new_file", new Callable(this, MethodName.OnFileNew));
+        hud.Connect("open_file", new Callable(this, MethodName.OnFileOpen));
+        hud.Connect("save_file", new Callable(this, MethodName.OnFileSave));
     }
 
     public override void _Process(double delta)
@@ -213,8 +225,45 @@ public partial class Editor : Node2D
             }
         }
     }
+    
+    private void UpdateWorkingMap()
+    {
+        if (SelectedPart == null || !SelectedPart.Value.Tags.Contains("tile"))
+        {
+            WorkingMap = null;
+            return;
+        }
+        
+        TileMapLayer tileMap = null;
+        if (SelectedPart.Value.Tags.Contains("layer_floor"))
+        {
+            tileMap = GetNode<TileMapLayer>("Floor");
+        } 
+        else if (SelectedPart.Value.Tags.Contains("layer_wall"))
+        {
+            tileMap = GetNode<TileMapLayer>("Walls");
+        }
+        Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
 
-    public void SelectionChanged(int partId)
+        WorkingMap = tileMap;
+    }
+
+    private void NewDocument()
+    {
+        Blueprint = new ShipBlueprint
+        {
+            Name = "Unnamed Ship",
+            GridLayers = new Dictionary<string, byte[]>()
+        };
+        foreach (var layer in Enum.GetNames(typeof(LayerNames)))
+        {
+            var node = GetNode<TileMapLayer>(layer);
+            node.Clear();
+            Blueprint.GridLayers[layer] = node.TileMapData;
+        }
+    }
+
+    private void OnSelectionChanged(int partId)
     {
         GridSnapping = false;
         CanRotate = false;
@@ -247,25 +296,46 @@ public partial class Editor : Node2D
         }
     }
 
-    private void UpdateWorkingMap()
+    private void OnNameChanged(string newName)
     {
-        if (SelectedPart == null || !SelectedPart.Value.Tags.Contains("tile"))
-        {
-            WorkingMap = null;
-            return;
-        }
-        
-        TileMapLayer tileMap = null;
-        if (SelectedPart.Value.Tags.Contains("layer_floor"))
-        {
-            tileMap = GetNode<TileMapLayer>("Floor");
-        } 
-        else if (SelectedPart.Value.Tags.Contains("layer_wall"))
-        {
-            tileMap = GetNode<TileMapLayer>("Walls");
-        }
-        Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
+        Blueprint.Name = newName;
+    }
 
-        WorkingMap = tileMap;
+    private void OnFileNew()
+    {
+        NewDocument();
+    }
+    
+    private void OnFileOpen(string fileName)
+    {
+        if (SerializationService.ReadObjectFromFile<ShipBlueprint>(fileName, out var blueprint))
+        {
+            Blueprint = blueprint;
+            foreach (var layer in blueprint.GridLayers)
+            {
+                GetNode<TileMapLayer>(layer.Key).TileMapData = layer.Value;
+                
+                // Yes this is lazy and might cause issues with the GDScript "MVVM" thing I'm trying here... shhh.....
+                GetNode<LineEdit>("HUD/NameBox").Text = blueprint.Name;
+            }
+        }
+        else
+        {
+            GD.PrintErr($"Failed to load file '{fileName}'!");
+        }
+    }
+
+    private void OnFileSave(string fileName)
+    {
+        foreach (var layer in Enum.GetNames(typeof(LayerNames)))
+        {
+            var node = GetNode<TileMapLayer>(layer);
+            Blueprint.GridLayers[layer] = node.TileMapData;
+        }
+
+        if (!SerializationService.WriteObjectToFile(fileName, Blueprint))
+        {
+            GD.PrintErr($"Failed to save file '{fileName}'!");
+        }
     }
 }
