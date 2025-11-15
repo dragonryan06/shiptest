@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Godot;
 using ShipTest.Grids;
 using ShipTest.Serialization;
@@ -106,15 +105,7 @@ public partial class Editor : Node2D
             grid.AddChild(inventoryItem);
         }
 
-        Blueprint = new ShipBlueprint
-        {
-            Name = "Unnamed Ship",
-            GridLayers = new Dictionary<string, TileMapLayer>()
-        };
-        foreach (var layer in Enum.GetNames(typeof(LayerNames)))
-        {
-            Blueprint.GridLayers[layer] = GetNode<TileMapLayer>(layer);
-        }
+        NewDocument();
 
         var hud = GetNode<CanvasLayer>("HUD");
         hud.Connect("selection_changed", new Callable(this, MethodName.OnSelectionChanged));
@@ -257,6 +248,21 @@ public partial class Editor : Node2D
         WorkingMap = tileMap;
     }
 
+    private void NewDocument()
+    {
+        Blueprint = new ShipBlueprint
+        {
+            Name = "Unnamed Ship",
+            GridLayers = new Dictionary<string, byte[]>()
+        };
+        foreach (var layer in Enum.GetNames(typeof(LayerNames)))
+        {
+            var node = GetNode<TileMapLayer>(layer);
+            node.Clear();
+            Blueprint.GridLayers[layer] = node.TileMapData;
+        }
+    }
+
     private void OnSelectionChanged(int partId)
     {
         GridSnapping = false;
@@ -297,16 +303,36 @@ public partial class Editor : Node2D
 
     private void OnFileNew()
     {
-        GD.Print("Pretend I just made a new, empty file!!!");
+        NewDocument();
     }
     
     private void OnFileOpen(string fileName)
     {
-        GD.Print($"Pretend I just opened the blueprint from {fileName}!!!");
+        if (SerializationService.ReadObjectFromFile<ShipBlueprint>(fileName, out var blueprint))
+        {
+            Blueprint = blueprint;
+            foreach (var layer in blueprint.GridLayers)
+            {
+                GetNode<TileMapLayer>(layer.Key).TileMapData = layer.Value;
+            }
+        }
+        else
+        {
+            GD.PrintErr($"Failed to load file '{fileName}'!");
+        }
     }
 
     private void OnFileSave(string fileName)
     {
-        GD.Print($"Pretend I just saved the blueprint to {fileName}!!!");
+        foreach (var layer in Enum.GetNames(typeof(LayerNames)))
+        {
+            var node = GetNode<TileMapLayer>(layer);
+            Blueprint.GridLayers[layer] = node.TileMapData;
+        }
+
+        if (!SerializationService.WriteObjectToFile(fileName, Blueprint))
+        {
+            GD.PrintErr($"Failed to save file '{fileName}'!");
+        }
     }
 }

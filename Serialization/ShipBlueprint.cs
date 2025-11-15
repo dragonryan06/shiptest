@@ -8,5 +8,5 @@ public class ShipBlueprint
 {
     public string Name { get; set; }
     
-    public Dictionary<string, TileMapLayer> GridLayers { get; set; }
+    public Dictionary<string, byte[]> GridLayers { get; set; }
 }
