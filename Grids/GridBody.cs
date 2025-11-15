@@ -56,6 +56,8 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             throw new InvalidOperationException("A GridBody instance must have at least a floor layer when readying!");
         }
 
+        InputPickable = true;
+
         InitializeChunks();
 
         SetCenterOfMass();
