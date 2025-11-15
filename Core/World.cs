@@ -22,7 +22,10 @@ public partial class World : Node2D
 
     public override void _Process(double delta)
     {
-        
+        if (_debugSpawning)
+        {
+            _loadedBody.Position = GetGlobalMousePosition();
+        }
     }
 
     public override void _Input(InputEvent @event)
@@ -31,8 +34,9 @@ public partial class World : Node2D
         {
             _debugSpawning = false;
 
-            _loadedBody.Position = mouseButton.Position;
-            AddChild(_loadedBody);
+            _loadedBody.Freeze = false;
+            _loadedBody.Modulate = Color.FromHtml("#ffffff");
+            _loadedBody = null;
         }
         else if (_debugSpawning && @event is InputEventKey { Keycode: Key.Escape, Pressed: true })
         {
@@ -50,5 +54,8 @@ public partial class World : Node2D
         
         _debugSpawning = true;
         _loadedBody = blueprint.ToGridBody();
+        _loadedBody.Freeze = true;
+        _loadedBody.Modulate = Color.FromHtml("#00ff00");
+        AddChild(_loadedBody);
     }
 }
