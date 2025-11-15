@@ -109,7 +109,7 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			file_dialog.popup_centered()
 			
 			await file_dialog.file_selected
-			var filename = file_dialog.current_file
+			var filename = file_dialog.current_path
 			last_filename = filename
 			open_file.emit(filename)
 		2:
@@ -129,6 +129,6 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			file_dialog.popup_centered()
 			
 			await file_dialog.file_selected
-			var filename = file_dialog.current_file
+			var filename = file_dialog.current_path
 			last_filename = filename
 			save_file.emit(filename)
