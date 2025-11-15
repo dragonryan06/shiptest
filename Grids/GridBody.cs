@@ -18,6 +18,12 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 
     private bool _mouseHover;
 
+    public static readonly Dictionary<string, string> LayerTileSets = new Dictionary<string, string>
+    {
+        { nameof(LayerNames.Floor), "res://Resources/Tilesets/floor.tres" },
+        { nameof(LayerNames.Walls), "res://Resources/Tilesets/walls.tres" }
+    };
+
     public Dictionary<Vector2I, GridChunk> Chunks { get; } = new();
 
     public Graph<GridFixture> FixtureGraph { get; } = new();
@@ -49,6 +55,8 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         {
             throw new InvalidOperationException("A GridBody instance must have at least a floor layer when readying!");
         }
+
+        InputPickable = true;
 
         InitializeChunks();
 

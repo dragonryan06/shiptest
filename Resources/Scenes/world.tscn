@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=4 uid="uid://cnp4pn6ddccft"]
+[gd_scene load_steps=14 format=4 uid="uid://cnp4pn6ddccft"]
 
 [ext_resource type="Script" uid="uid://cgppi0bt3h8v0" path="res://Core/World.cs" id="1_pmidl"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_7h14u"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://dq17chvc36u4q" path="res://Resources/Scenes/Debug/chunk_splitting_tester.tscn" id="6_cq0i2"]
 [ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="6_xapce"]
 [ext_resource type="PackedScene" uid="uid://dodb2dwotltmg" path="res://Resources/Scenes/pause_menu.tscn" id="8_hddtm"]
+[ext_resource type="Script" path="res://Resources/Scripts/debug_overlay.gd" id="9_mvdjm"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ye1hu"]
 
@@ -92,3 +93,36 @@ polygon = PackedVector2Array(-1024, 0, -1024, -2048, 1024, -2048, 1024, 0)
 
 [node name="PauseMenu" parent="HUD" instance=ExtResource("8_hddtm")]
 visible = false
+
+[node name="DebugOverlay" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+script = ExtResource("9_mvdjm")
+
+[node name="DataList" type="VBoxContainer" parent="HUD/DebugOverlay"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 43.0
+grow_vertical = 2
+
+[node name="FPSCounter" type="Label" parent="HUD/DebugOverlay/DataList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.666667, 0.666667, 0.666667, 1)
+text = "?? fps"
+
+[node name="Actions" type="MenuButton" parent="HUD/DebugOverlay"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -31.0
+offset_right = 65.0
+grow_vertical = 0
+text = "Actions"
+flat = false
+item_count = 1
+popup/item_0/text = "Spawn..."
+popup/item_0/id = 0
