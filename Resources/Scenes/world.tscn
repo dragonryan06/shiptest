@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=4 uid="uid://cnp4pn6ddccft"]
+[gd_scene load_steps=13 format=4 uid="uid://cnp4pn6ddccft"]
 
 [ext_resource type="Script" uid="uid://cgppi0bt3h8v0" path="res://Core/World.cs" id="1_pmidl"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_7h14u"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://ctnv3mwjqcj8y" path="res://Grids/GridBody.cs" id="5_ye1hu"]
 [ext_resource type="PackedScene" uid="uid://dq17chvc36u4q" path="res://Resources/Scenes/Debug/chunk_splitting_tester.tscn" id="6_cq0i2"]
 [ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="6_xapce"]
+[ext_resource type="PackedScene" uid="uid://dodb2dwotltmg" path="res://Resources/Scenes/pause_menu.tscn" id="8_hddtm"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ye1hu"]
 
@@ -86,3 +87,8 @@ color = Color(1, 1, 1, 0.278431)
 invert_enabled = true
 invert_border = 4096.0
 polygon = PackedVector2Array(-1024, 0, -1024, -2048, 1024, -2048, 1024, 0)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="PauseMenu" parent="HUD" instance=ExtResource("8_hddtm")]
+visible = false
