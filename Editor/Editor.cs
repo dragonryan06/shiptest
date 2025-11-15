@@ -315,9 +315,10 @@ public partial class Editor : Node2D
             {
                 GetNode<TileMapLayer>(layer.Key).TileMapData = layer.Value;
                 
-                // Yes this is lazy and might cause issues with the GDScript "MVVM" thing I'm trying here... shhh.....
-                GetNode<LineEdit>("HUD/NameBox").Text = blueprint.Name;
             }
+            
+            // Yes this is lazy and might cause issues with the GDScript "MVVM" thing I'm trying here... shhh.....
+            GetNode<LineEdit>("HUD/NameBox").Text = blueprint.Name;
         }
         else
         {
