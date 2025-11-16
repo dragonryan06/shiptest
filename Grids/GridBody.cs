@@ -12,13 +12,14 @@ namespace ShipTest.Grids;
 // https://docs.spacestation14.com/en/robust-toolbox/transform/grids.html
 // If this system of doing polygon merging gets too laggy, might be worth it to implement
 // exactly what RobustToolbox does here, with two levels of flood-fill algorithms instead.
+[GlobalClass]
 public partial class GridBody : RigidBody2D, IEntity, IDestructible
 {
     private const int ChunkSize = 16;
 
     private bool _mouseHover;
 
-    public static readonly Dictionary<string, string> LayerTileSets = new Dictionary<string, string>
+    public static readonly Dictionary<string, string> LayerTileSets = new()
     {
         { nameof(LayerNames.Floor), "res://Resources/Tilesets/floor.tres" },
         { nameof(LayerNames.Walls), "res://Resources/Tilesets/walls.tres" }

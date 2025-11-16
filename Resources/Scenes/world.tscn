@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://dq17chvc36u4q" path="res://Resources/Scenes/Debug/chunk_splitting_tester.tscn" id="6_cq0i2"]
 [ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="6_xapce"]
 [ext_resource type="PackedScene" uid="uid://dodb2dwotltmg" path="res://Resources/Scenes/pause_menu.tscn" id="8_hddtm"]
-[ext_resource type="Script" path="res://Resources/Scripts/debug_overlay.gd" id="9_mvdjm"]
+[ext_resource type="Script" uid="uid://dwkresa34tq67" path="res://Resources/Scripts/debug_overlay.gd" id="9_mvdjm"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ye1hu"]
 
