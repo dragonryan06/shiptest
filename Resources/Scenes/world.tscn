@@ -1,12 +1,8 @@
-[gd_scene load_steps=14 format=4 uid="uid://cnp4pn6ddccft"]
+[gd_scene load_steps=10 format=3 uid="uid://cnp4pn6ddccft"]
 
 [ext_resource type="Script" uid="uid://cgppi0bt3h8v0" path="res://Core/World.cs" id="1_pmidl"]
 [ext_resource type="Script" uid="uid://la6iy0d61q7p" path="res://Core/FreeCam.cs" id="2_7h14u"]
 [ext_resource type="Script" uid="uid://dv1bo0aeykxrp" path="res://Resources/Scripts/cursor_pusher.gd" id="3_xapce"]
-[ext_resource type="PackedScene" uid="uid://dw37jw7kh0vyp" path="res://Resources/Scenes/Debug/test_grid_object.tscn" id="4_wc75r"]
-[ext_resource type="Script" uid="uid://ctnv3mwjqcj8y" path="res://Grids/GridBody.cs" id="5_ye1hu"]
-[ext_resource type="PackedScene" uid="uid://dq17chvc36u4q" path="res://Resources/Scenes/Debug/chunk_splitting_tester.tscn" id="6_cq0i2"]
-[ext_resource type="TileSet" uid="uid://d1sjrmo2d0p78" path="res://Resources/Tilesets/floor.tres" id="6_xapce"]
 [ext_resource type="PackedScene" uid="uid://dodb2dwotltmg" path="res://Resources/Scenes/pause_menu.tscn" id="8_hddtm"]
 [ext_resource type="Script" uid="uid://dwkresa34tq67" path="res://Resources/Scripts/debug_overlay.gd" id="9_mvdjm"]
 
@@ -23,7 +19,7 @@ normal = Vector2(1, 0)
 
 [node name="World" type="Node2D"]
 script = ExtResource("1_pmidl")
-DebugLayers = 3
+DebugLayers = 5
 
 [node name="InfiniteGrid" type="ColorRect" parent="."]
 offset_right = 1152.0
@@ -39,20 +35,6 @@ metadata/_custom_type_script = "uid://dv1bo0aeykxrp"
 
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("2_7h14u")
-
-[node name="ChunkSplittingTester" parent="." instance=ExtResource("6_cq0i2")]
-position = Vector2(339, -163)
-
-[node name="TestGridObject" parent="." instance=ExtResource("4_wc75r")]
-position = Vector2(-503, -246)
-
-[node name="MyShip" type="RigidBody2D" parent="."]
-input_pickable = true
-script = ExtResource("5_ye1hu")
-
-[node name="Floor" type="TileMapLayer" parent="MyShip"]
-tile_map_data = PackedByteArray("AAD9/wAAAQACAAAAAAD9////AQABAAEAAAD8////AQACAAAAAAD8//7/AQAAAAAAAAD+/wAAAQAAAAAAAAD//wAAAQABAAAAAAD/////AQACAAEAAAAAAP//AQABAAAAAAAAAP7/AQAAAAAAAAAAAP3/AQABAAEAAAD///3/AQACAAAAAAD///z/AQABAAEAAAD+//z/AQAAAAAAAAD8//3/AQACAAEAAAD9//3/AQABAAAAAAD9//z/AQACAAEAAAD7//7/AAAAAAAAAAABAP7/AAAAAAAAAAD+//v/AAAAAAAAAAD+/wEAAAAAAAAAAAD+/wIAAAAAAAAAAAD9/wIAAAAAAAAAAAD//wIAAAAAAAAAAAACAP7/AAAAAAAAAAACAP//AAAAAAAAAAACAP3/AAAAAAAAAAD///r/AAAAAAAAAAD+//r/AAAAAAAAAAD9//r/AAAAAAAAAAD6//7/AAAAAAAAAAD6//3/AAAAAAAAAAD6////AAAAAAAAAAD8/wEAAAABAAEAAAD7/wAAAAABAAEAAAD8/wIAAAACAAAAAAD7/wEAAAACAAAAAAD6/wAAAAACAAAAAAAAAAIAAAABAAAAAAABAAEAAAABAAAAAAACAAAAAAABAAAAAAAAAAEAAAACAAEAAAABAAAAAAACAAEAAAACAPz/AAABAAEAAAABAPv/AAABAAEAAAAAAPr/AAABAAEAAAABAPz/AAACAAAAAAAAAPv/AAACAAAAAAD8//v/AAABAAAAAAD7//z/AAABAAAAAAD6//z/AAACAAEAAAD7//v/AAACAAEAAAD8//r/AAACAAEAAAA=")
-tile_set = ExtResource("6_xapce")
 
 [node name="WorldBoundaries" type="Node" parent="."]
 

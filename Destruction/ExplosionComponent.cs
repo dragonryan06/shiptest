@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using ShipTest.Core.Ecs;
 using ShipTest.Globals;
+using ShipTest.Grids;
 
 namespace ShipTest.Destruction;
 
@@ -122,6 +123,11 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
                     break;
                 }
 
+                if (GetEntity<GridBody>().GetNodeOrNull<TileMapLayer>(nameof(LayerNames.Walls)).GetCellSourceId(neighbor) != -1)
+                {
+                    break;
+                }
+
                 if (_cellPressures.TryGetValue(neighbor, out var pressure))
                 {
                     if (localPressure <= pressure)
@@ -141,7 +147,7 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
 
             return localPressure;
         }
-
+        
         // Very similar to SetOrAddPressure but a little different.
         void IncrementPressure(Vector2I cell, int lastPressure, int by)
         {
