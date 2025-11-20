@@ -4,7 +4,6 @@ using System.Linq;
 using Godot;
 using ShipTest.Core.Ecs;
 using ShipTest.Globals;
-using ShipTest.Grids;
 
 namespace ShipTest.Destruction;
 
@@ -83,19 +82,27 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
         {
             var lastPressure = _cellPressures[cell];
 
-            if (lastPressure > 5)
+            switch (lastPressure)
             {
-                GetEntity<IDestructible>().DestroyCell(cell);
+                case > 20:
+                    var surroundingObstacles =
+                        GetSurroundingCells(cell).Where(GetEntity<IDestructible>().IsCellExplosionObstacle).ToList();
+                    if (surroundingObstacles.Count != 0)
+                    {
+                        GetEntity<IDestructible>().DestroyCell(surroundingObstacles[(int)(GD.Randi() % surroundingObstacles.Count)]);
+                    }
+                    break;
+                case > 10:
+                    GetEntity<IDestructible>().DestroyCell(cell);
+                    break;
             }
 
             switch (lastPressure)
             {
                 case > 1:
-                {
                     var newPressure = SpreadPressure(cell);
                     nextCellPressures.TryAdd(cell, newPressure);
                     break;
-                }
                 case 1:
                     nextCellPressures.TryAdd(cell, 0);
                     break;
@@ -118,12 +125,7 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
 
             foreach (var neighbor in surroundingCells)
             {
-                if (localPressure <= 1)
-                {
-                    break;
-                }
-
-                if (GetEntity<GridBody>().GetNodeOrNull<TileMapLayer>(nameof(LayerNames.Walls)).GetCellSourceId(neighbor) != -1)
+                if (localPressure <= 1 || GetEntity<IDestructible>().IsCellExplosionObstacle(neighbor))
                 {
                     break;
                 }

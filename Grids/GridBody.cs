@@ -36,18 +36,32 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     }
 
     // IDestructible
+    public bool IsCellExplosionObstacle(Vector2I cell) 
+        => GetNode<TileMapLayer>(nameof(LayerNames.Walls)).GetCellSourceId(cell) != -1;
+
     public void DestroyCell(Vector2I cell) // TODO all cell changes need to be piped through common methods eventually cause theres a lot that needs to be updated in every case (most of the time on a CallDeferred basis).
     {
-        var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
-        if (tileMap.GetCellSourceId(cell) != -1)
+        var walls = GetNode<TileMapLayer>(nameof(LayerNames.Walls));
+        var floor = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
+        
+        if (walls.GetCellSourceId(cell) != -1)
         {
-            tileMap.EraseCell(cell);
-            SetCenterOfMass();
-
-            GenerateChunkCollisions(Chunks[TileToChunkPos(cell)]);
-
-            UpdateFixtureGraph();
+            walls.EraseCell(cell);
+        } 
+        else if (floor.GetCellSourceId(cell) != -1)
+        {
+            floor.EraseCell(cell);
         }
+        else
+        {
+            return;
+        }
+        
+        SetCenterOfMass();
+
+        GenerateChunkCollisions(Chunks[TileToChunkPos(cell)]);
+
+        UpdateFixtureGraph();
     }
 
     public override void _Ready()
