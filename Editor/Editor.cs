@@ -12,6 +12,7 @@ public partial class Editor : Node2D
 {
     private const string InventoryGridPath =
         "HUD/PartInventory/PanelContainer/VBoxContainer/ScrollContainer/MarginContainer/GridContainer";
+    private const int UnderWallSourceId = 1;
 
     private readonly Color _placingColor = new("#00ff00");
     private readonly Color _deletingColor = new("#ff0000");
@@ -209,6 +210,11 @@ public partial class Editor : Node2D
                             preview.GetCellSourceId(cell), 
                             preview.GetCellAtlasCoords(cell), 
                             preview.GetCellAlternativeTile(cell));
+
+                        if (WorkingMap.Name == "Walls")
+                        {
+                            GetNode<TileMapLayer>("Floor").SetCell(cell,UnderWallSourceId,Vector2I.Zero);
+                        }
                     }
                 }
                 

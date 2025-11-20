@@ -12,13 +12,14 @@ namespace ShipTest.Grids;
 // https://docs.spacestation14.com/en/robust-toolbox/transform/grids.html
 // If this system of doing polygon merging gets too laggy, might be worth it to implement
 // exactly what RobustToolbox does here, with two levels of flood-fill algorithms instead.
+[GlobalClass]
 public partial class GridBody : RigidBody2D, IEntity, IDestructible
 {
     private const int ChunkSize = 16;
 
     private bool _mouseHover;
 
-    public static readonly Dictionary<string, string> LayerTileSets = new Dictionary<string, string>
+    public static readonly Dictionary<string, string> LayerTileSets = new()
     {
         { nameof(LayerNames.Floor), "res://Resources/Tilesets/floor.tres" },
         { nameof(LayerNames.Walls), "res://Resources/Tilesets/walls.tres" }
@@ -35,18 +36,32 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     }
 
     // IDestructible
+    public bool IsCellExplosionObstacle(Vector2I cell) 
+        => GetNode<TileMapLayer>(nameof(LayerNames.Walls)).GetCellSourceId(cell) != -1;
+
     public void DestroyCell(Vector2I cell) // TODO all cell changes need to be piped through common methods eventually cause theres a lot that needs to be updated in every case (most of the time on a CallDeferred basis).
     {
-        var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
-        if (tileMap.GetCellSourceId(cell) != -1)
+        var walls = GetNode<TileMapLayer>(nameof(LayerNames.Walls));
+        var floor = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
+        
+        if (walls.GetCellSourceId(cell) != -1)
         {
-            tileMap.EraseCell(cell);
-            SetCenterOfMass();
-
-            GenerateChunkCollisions(Chunks[TileToChunkPos(cell)]);
-
-            UpdateFixtureGraph();
+            walls.EraseCell(cell);
+        } 
+        else if (floor.GetCellSourceId(cell) != -1)
+        {
+            floor.EraseCell(cell);
         }
+        else
+        {
+            return;
+        }
+        
+        SetCenterOfMass();
+
+        GenerateChunkCollisions(Chunks[TileToChunkPos(cell)]);
+
+        UpdateFixtureGraph();
     }
 
     public override void _Ready()
@@ -228,6 +243,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             foreach (var comp in components.Skip(1))
             {
                 var oldFloor = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
+                var oldWalls = GetNode<TileMapLayer>(nameof(LayerNames.Walls));
 
                 var newBody = new GridBody
                 {
@@ -237,8 +253,10 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                     LinearVelocity = LinearVelocity,
                     AngularVelocity = AngularVelocity,
                 };
-                var newMap = (TileMapLayer)oldFloor.Duplicate();
-                newMap.Clear();
+                var newFloor = (TileMapLayer)oldFloor.Duplicate();
+                newFloor.Clear();
+                var newWalls = (TileMapLayer)oldWalls.Duplicate();
+                newWalls.Clear();
 
                 foreach (var fixture in comp)
                 {
@@ -247,13 +265,19 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                     
                     foreach (var cell in fixture.ContainedCells)
                     {
-                        newMap.SetCell(
+                        newFloor.SetCell(
                             cell, 
                             oldFloor.GetCellSourceId(cell), 
                             oldFloor.GetCellAtlasCoords(cell),
                             oldFloor.GetCellAlternativeTile(cell));
+                        newWalls.SetCell(
+                            cell,
+                            oldWalls.GetCellSourceId(cell), 
+                            oldWalls.GetCellAtlasCoords(cell),
+                            oldWalls.GetCellAlternativeTile(cell));
                         
                         oldFloor.EraseCell(cell);
+                        oldWalls.EraseCell(cell);
                     }
                 }
                 
@@ -262,7 +286,8 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                 // this one just for the debug explosions
                 newBody.InputPickable = true;
                 
-                newBody.AddChild(newMap);
+                newBody.AddChild(newFloor);
+                newBody.AddChild(newWalls);
                 AddSibling(newBody);
             }
         }

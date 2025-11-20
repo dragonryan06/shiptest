@@ -82,19 +82,27 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
         {
             var lastPressure = _cellPressures[cell];
 
-            if (lastPressure > 5)
+            switch (lastPressure)
             {
-                GetEntity<IDestructible>().DestroyCell(cell);
+                case > 20:
+                    var surroundingObstacles =
+                        GetSurroundingCells(cell).Where(GetEntity<IDestructible>().IsCellExplosionObstacle).ToList();
+                    if (surroundingObstacles.Count != 0)
+                    {
+                        GetEntity<IDestructible>().DestroyCell(surroundingObstacles[(int)(GD.Randi() % surroundingObstacles.Count)]);
+                    }
+                    break;
+                case > 10:
+                    GetEntity<IDestructible>().DestroyCell(cell);
+                    break;
             }
 
             switch (lastPressure)
             {
                 case > 1:
-                {
                     var newPressure = SpreadPressure(cell);
                     nextCellPressures.TryAdd(cell, newPressure);
                     break;
-                }
                 case 1:
                     nextCellPressures.TryAdd(cell, 0);
                     break;
@@ -117,7 +125,7 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
 
             foreach (var neighbor in surroundingCells)
             {
-                if (localPressure <= 1)
+                if (localPressure <= 1 || GetEntity<IDestructible>().IsCellExplosionObstacle(neighbor))
                 {
                     break;
                 }
@@ -141,7 +149,7 @@ public partial class ExplosionComponent : TileMapLayer, IComponent
 
             return localPressure;
         }
-
+        
         // Very similar to SetOrAddPressure but a little different.
         void IncrementPressure(Vector2I cell, int lastPressure, int by)
         {
