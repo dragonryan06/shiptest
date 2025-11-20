@@ -243,6 +243,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             foreach (var comp in components.Skip(1))
             {
                 var oldFloor = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
+                var oldWalls = GetNode<TileMapLayer>(nameof(LayerNames.Walls));
 
                 var newBody = new GridBody
                 {
@@ -252,8 +253,10 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                     LinearVelocity = LinearVelocity,
                     AngularVelocity = AngularVelocity,
                 };
-                var newMap = (TileMapLayer)oldFloor.Duplicate();
-                newMap.Clear();
+                var newFloor = (TileMapLayer)oldFloor.Duplicate();
+                newFloor.Clear();
+                var newWalls = (TileMapLayer)oldWalls.Duplicate();
+                newWalls.Clear();
 
                 foreach (var fixture in comp)
                 {
@@ -262,13 +265,19 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                     
                     foreach (var cell in fixture.ContainedCells)
                     {
-                        newMap.SetCell(
+                        newFloor.SetCell(
                             cell, 
                             oldFloor.GetCellSourceId(cell), 
                             oldFloor.GetCellAtlasCoords(cell),
                             oldFloor.GetCellAlternativeTile(cell));
+                        newWalls.SetCell(
+                            cell,
+                            oldWalls.GetCellSourceId(cell), 
+                            oldWalls.GetCellAtlasCoords(cell),
+                            oldWalls.GetCellAlternativeTile(cell));
                         
                         oldFloor.EraseCell(cell);
+                        oldWalls.EraseCell(cell);
                     }
                 }
                 
@@ -277,7 +286,8 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                 // this one just for the debug explosions
                 newBody.InputPickable = true;
                 
-                newBody.AddChild(newMap);
+                newBody.AddChild(newFloor);
+                newBody.AddChild(newWalls);
                 AddSibling(newBody);
             }
         }
