@@ -57,11 +57,11 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             return;
         }
         
-        SetCenterOfMass();
-
         GenerateChunkCollisions(Chunks[TileToChunkPos(cell)]);
 
         UpdateFixtureGraph();
+
+        SetCenterOfMass();
     }
 
     public override void _Ready()
@@ -74,15 +74,15 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         InputPickable = true;
 
         InitializeChunks();
-
-        SetCenterOfMass();
-
+        
         foreach (var chunk in Chunks.Values)
         {
             GenerateChunkCollisions(chunk);
         }
 
         UpdateFixtureGraph();
+        
+        SetCenterOfMass();
 
         MouseEntered += OnMouseEntered;
         MouseExited += OnMouseExited;
@@ -175,13 +175,18 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 
     private void SetCenterOfMass()
     {
-        var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
-        CenterOfMassMode = CenterOfMassModeEnum.Custom;
+        var massDistribution = Vector2.Zero;
+        var totalMass = 0.0f;
+        
+        foreach (var chunk in Chunks.Values)
+        {
+            totalMass += chunk.Mass;
+            massDistribution += chunk.Mass * chunk.CenterOfMass;
+        }
 
-        var usedRect = tileMap.GetUsedRect();
-        CenterOfMass = new Rect2(
-            tileMap.MapToLocal(usedRect.Position) - new Vector2(0.75f, 0.75f) * tileMap.TileSet.TileSize, 
-            tileMap.MapToLocal(usedRect.Size)).GetCenter();
+        Mass = totalMass;
+        CenterOfMassMode = CenterOfMassModeEnum.Custom;
+        CenterOfMass = massDistribution / totalMass;
     }
 
     private void GenerateChunkCollisions(GridChunk chunk)
@@ -223,6 +228,10 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         foreach (var chunkPos in Chunks.Keys.Where(k => Chunks[k].IsDirty))
         {
             Chunks[chunkPos].Fixtures.ForEach(fixture => FixtureGraph.UpdateNeighborsOf(fixture));
+            Chunks[chunkPos].ComputeCenterOfMass( [
+                GetNode<TileMapLayer>(nameof(LayerNames.Floor)), 
+                GetNode<TileMapLayer>(nameof(LayerNames.Walls))
+            ]);
             Chunks[chunkPos].IsDirty = false;
         }
 
