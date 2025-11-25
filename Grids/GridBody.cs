@@ -207,6 +207,18 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                 continue;
             }
 
+            if (node is CollisionPolygon2D shape)
+            {
+                // May not be ideal to do this here, instead the collisions could be generated AFTER the shape is offset instead?
+                var polygon = shape.GetPolygon();
+                for (var i = 0; i < polygon.Length; i++)
+                {
+                    polygon[i] -= offset;
+                }
+                shape.SetPolygon(polygon);
+                continue;
+            }
+
             node.Position = -offset;
         }
     }
