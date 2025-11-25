@@ -59,9 +59,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         
         GenerateChunkCollisions(Chunks[TileToChunkPos(cell)]);
 
-        UpdateFixtureGraph();
-
-        SetCenterOfMass();
+        Update();
     }
 
     public override void _Ready()
@@ -80,9 +78,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             GenerateChunkCollisions(chunk);
         }
 
-        UpdateFixtureGraph();
-        
-        SetCenterOfMass();
+        Update();
 
         MouseEntered += OnMouseEntered;
         MouseExited += OnMouseExited;
@@ -155,7 +151,16 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 
         return neighbors;
     }
+    
+    private void Update()
+    {
+        UpdateFixtureGraph();
 
+        RecenterContent();
+
+        SetCenterOfMass();
+    }
+    
     private void InitializeChunks()
     {
         var tileMap = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
@@ -172,7 +177,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
             }
         }
     }
-
+    
     private void SetCenterOfMass()
     {
         var massDistribution = Vector2.Zero;
@@ -186,7 +191,24 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 
         Mass = totalMass;
         CenterOfMassMode = CenterOfMassModeEnum.Custom;
-        CenterOfMass = massDistribution / totalMass;
+        CenterOfMass = (massDistribution / totalMass) + GetNode<TileMapLayer>(nameof(LayerNames.Floor)).Position;
+    }
+    
+    private void RecenterContent()
+    {
+        var floor = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
+        var offset = floor.MapToLocal(floor.GetUsedRect().GetCenter());
+
+        Position += offset;
+        foreach (var child in GetChildren())
+        {
+            if (child is not Node2D node)
+            {
+                continue;
+            }
+
+            node.Position = -offset;
+        }
     }
 
     private void GenerateChunkCollisions(GridChunk chunk)
@@ -289,8 +311,6 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                         oldWalls.EraseCell(cell);
                     }
                 }
-                
-                SetCenterOfMass();
 
                 // this one just for the debug explosions
                 newBody.InputPickable = true;
