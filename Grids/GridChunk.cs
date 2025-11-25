@@ -15,10 +15,35 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
     public List<GridFixture> Fixtures { get; private set; } = [];
 
     // When a chunk is dirty, later in the frame each fixture in it will try to pathfind to its neighbors
-    // to make sure they're still neighboring.
+    // to make sure they're still neighboring, and the center of mass will be recomputed.
     public bool IsDirty { get; set; } = true;
 
     public string Name { get; } = name;
+    
+    public float Mass { get; private set; }
+    
+    public Vector2 CenterOfMass { get; private set; }
+    
+    // This is probably unnecessary double iteration because it'll always be called with GenerateCollisions, but I don't
+    // think it's entirely necessary to rewrite this implementation over something small like this.
+    public void ComputeCenterOfMass(TileMapLayer[] tileMapLayers)
+    {
+        var massDistribution = Vector2.Zero;
+        var totalMass = 0.0f;
+        
+        foreach (var tileMap in tileMapLayers)
+        {
+            foreach (var cell in tileMap.GetUsedCells())
+            {
+                var mass = tileMap.GetCellTileData(cell).GetCustomData("Mass").AsInt32();
+                totalMass += mass;
+                massDistribution += mass * tileMap.MapToLocal(cell);
+            }
+        }
+    
+        Mass = totalMass;
+        CenterOfMass = massDistribution / totalMass;
+    }
 
     // https://gist.github.com/afk-mario/15b5855ccce145516d1b458acfe29a28
     public List<GridFixture> GenerateCollisions(TileMapLayer tileMap)
