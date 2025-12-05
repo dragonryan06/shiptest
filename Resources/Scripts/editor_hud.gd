@@ -107,10 +107,12 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
 			file_dialog.add_filter("*.json", "JSON files")
 			file_dialog.current_path = ProjectSettings.globalize_path("user://")
+			file_dialog.canceled.connect(file_dialog.queue_free)
 			file_dialog.popup_centered()
 			
 			await file_dialog.file_selected
 			var filename = file_dialog.current_path
+			file_dialog.queue_free()
 			last_filename = filename
 			open_file.emit(filename)
 		2:
@@ -128,9 +130,11 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
 			file_dialog.add_filter("*.json", "JSON files")
 			file_dialog.current_path = ProjectSettings.globalize_path("user://")
+			file_dialog.canceled.connect(file_dialog.queue_free)
 			file_dialog.popup_centered()
 			
 			await file_dialog.file_selected
 			var filename = file_dialog.current_path
+			file_dialog.queue_free()
 			last_filename = filename
 			save_file.emit(filename)

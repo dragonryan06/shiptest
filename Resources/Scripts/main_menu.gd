@@ -5,6 +5,8 @@ extends Node2D
 
 func _on_test_environment_pressed() -> void:
 	get_tree().change_scene_to_packed(TestEnvironment)
+	DebugDraw.queue_redraw()
 
 func _on_editor_pressed() -> void:
 	get_tree().change_scene_to_packed(Editor)
+	DebugDraw.queue_redraw()
