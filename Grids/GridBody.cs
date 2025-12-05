@@ -156,9 +156,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     {
         UpdateFixtureGraph();
 
-        RecenterContent();
-
-        SetCenterOfMass();
+        RecalculateMassDistribution();
     }
     
     private void InitializeChunks()
@@ -178,48 +176,39 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         }
     }
     
-    private void SetCenterOfMass()
+    private void RecalculateMassDistribution()
     {
-        var massDistribution = Vector2.Zero;
-        var totalMass = 0.0f;
-        
-        foreach (var chunk in Chunks.Values)
+        ComputeCenterOfMass();
+        ComputeInertia();
+        return;
+
+        void ComputeCenterOfMass()
         {
-            totalMass += chunk.Mass;
-            massDistribution += chunk.Mass * chunk.CenterOfMass;
+            var massDistribution = Vector2.Zero;
+            var totalMass = 0.0f;
+            
+            foreach (var chunk in Chunks.Values)
+            {
+                totalMass += chunk.Mass;
+                massDistribution += chunk.Mass * chunk.CenterOfMass;
+            }
+
+            Mass = totalMass;
+            CenterOfMassMode = CenterOfMassModeEnum.Custom;
+            CenterOfMass = (massDistribution / totalMass) + GetNode<TileMapLayer>(nameof(LayerNames.Floor)).Position;
         }
 
-        Mass = totalMass;
-        CenterOfMassMode = CenterOfMassModeEnum.Custom;
-        CenterOfMass = (massDistribution / totalMass) + GetNode<TileMapLayer>(nameof(LayerNames.Floor)).Position;
-    }
-    
-    private void RecenterContent()
-    {
-        var floor = GetNode<TileMapLayer>(nameof(LayerNames.Floor));
-        var offset = floor.MapToLocal(floor.GetUsedRect().GetCenter());
-
-        Position += offset;
-        foreach (var child in GetChildren())
+        void ComputeInertia()
         {
-            if (child is not Node2D node)
+            var totalInertia = 0.0f;
+
+            foreach (var chunk in Chunks.Values)
             {
-                continue;
+                // Parallel Axis Theorem
+                totalInertia += chunk.Inertia + chunk.Mass * chunk.CenterOfMass.DistanceSquaredTo(CenterOfMass);
             }
 
-            if (node is CollisionPolygon2D shape)
-            {
-                // May not be ideal to do this here, instead the collisions could be generated AFTER the shape is offset instead?
-                var polygon = shape.GetPolygon();
-                for (var i = 0; i < polygon.Length; i++)
-                {
-                    polygon[i] -= offset;
-                }
-                shape.SetPolygon(polygon);
-                continue;
-            }
-
-            node.Position = -offset;
+            Inertia = totalInertia;
         }
     }
 
@@ -262,7 +251,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         foreach (var chunkPos in Chunks.Keys.Where(k => Chunks[k].IsDirty))
         {
             Chunks[chunkPos].Fixtures.ForEach(fixture => FixtureGraph.UpdateNeighborsOf(fixture));
-            Chunks[chunkPos].ComputeCenterOfMass( [
+            Chunks[chunkPos].RecalculateMassDistribution( [
                 GetNode<TileMapLayer>(nameof(LayerNames.Floor)), 
                 GetNode<TileMapLayer>(nameof(LayerNames.Walls))
             ]);
