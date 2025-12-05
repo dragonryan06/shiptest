@@ -65,7 +65,7 @@ position = Vector2(1, 1)
 shape = SubResource("WorldBoundaryShape2D_xapce")
 
 [node name="Polygon2D" type="Polygon2D" parent="WorldBoundaries"]
-position = Vector2(13, 1009)
+position = Vector2(0, 1024)
 color = Color(1, 1, 1, 0.278431)
 invert_enabled = true
 invert_border = 4096.0
