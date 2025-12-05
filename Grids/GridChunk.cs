@@ -20,29 +20,55 @@ public class GridChunk(string name, Rect2I bounds, Vector2I tileSize)
 
     public string Name { get; } = name;
     
+    // kg
     public float Mass { get; private set; }
     
+    // kg * px^2
+    public float Inertia { get; private set; }
+    
     public Vector2 CenterOfMass { get; private set; }
-    
-    // This is probably unnecessary double iteration because it'll always be called with GenerateCollisions, but I don't
-    // think it's entirely necessary to rewrite this implementation over something small like this.
-    public void ComputeCenterOfMass(TileMapLayer[] tileMapLayers)
+
+    public void RecalculateMassDistribution(TileMapLayer[] tileMapLayers)
     {
-        var massDistribution = Vector2.Zero;
-        var totalMass = 0.0f;
-        
-        foreach (var tileMap in tileMapLayers)
+        ComputeCenterOfMass();
+        ComputeInertia();
+        return;
+
+        void ComputeCenterOfMass()
         {
-            foreach (var cell in tileMap.GetUsedCells())
+            var massDistribution = Vector2.Zero;
+            var totalMass = 0.0f;
+        
+            foreach (var tileMap in tileMapLayers)
             {
-                var mass = tileMap.GetCellTileData(cell).GetCustomData("Mass").AsInt32();
-                totalMass += mass;
-                massDistribution += mass * tileMap.MapToLocal(cell);
+                foreach (var cell in tileMap.GetUsedCells())
+                {
+                    var mass = tileMap.GetCellTileData(cell).GetCustomData("Mass").AsInt32();
+                    totalMass += mass;
+                    massDistribution += mass * tileMap.MapToLocal(cell);
+                }
             }
-        }
     
-        Mass = totalMass;
-        CenterOfMass = massDistribution / totalMass;
+            Mass = totalMass;
+            CenterOfMass = massDistribution / totalMass;
+        }
+
+        void ComputeInertia()
+        {
+            var totalInertia = 0.0f;
+
+            foreach (var tileMap in tileMapLayers)
+            {
+                foreach (var cell in tileMap.GetUsedCells())
+                {
+                    var mass = tileMap.GetCellTileData(cell).GetCustomData("Mass").AsInt32();
+                    var squaredRadius = CenterOfMass.DistanceSquaredTo(tileMap.MapToLocal(cell));
+                    totalInertia += mass * squaredRadius;
+                }
+            }
+
+            Inertia = totalInertia;
+        }
     }
 
     // https://gist.github.com/afk-mario/15b5855ccce145516d1b458acfe29a28
