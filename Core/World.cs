@@ -14,7 +14,6 @@ public partial class World : Node2D
     
     public override void _Ready()
     {
-        // TODO: big problem rn that debug stuff will still be being calculated even if the layer isnt drawing.
         DebugDraw.Instance.LayerState |= DebugLayers;
 
         GetNode<Control>("HUD/DebugOverlay").Connect("debug_spawning", new Callable(this, MethodName.OnDebugSpawning));
