@@ -73,6 +73,25 @@
 	},
 	
 	{
+		"id" : 5,
+		"name" : "Thruster",
+		"icon" : "res://Resources/Textures/Tiles/thruster.png",
+		"source_id" : 0,
+		"orientations" : [
+			[1, 0],
+			[0, 1],
+			[0, 0],
+			[1, 1]
+		],
+		"tags" : [
+			"tile",
+			"entity",
+			"layer_buildings",
+			"can_rotate"
+		]
+	},
+	
+	{
 		"id" : -1,
 		"name" : "Reinforced Wall",
 		"icon" : "res://Resources/Textures/Tiles/r_wall.png",

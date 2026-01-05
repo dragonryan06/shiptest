@@ -1,0 +1,15 @@
+[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://b0vtxyida33va"]
+
+[ext_resource type="Texture2D" uid="uid://pvq14r4w2mev" path="res://Resources/Textures/Tiles/thruster.png" id="1_gluet"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4dsau"]
+texture = ExtResource("1_gluet")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+1:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+
+[resource]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_4dsau")

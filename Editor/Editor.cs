@@ -245,6 +245,10 @@ public partial class Editor : Node2D
         {
             tileMap = GetNode<TileMapLayer>("Floor");
         } 
+        else if (SelectedPart.Value.Tags.Contains("layer_buildings"))
+        {
+            tileMap = GetNode<TileMapLayer>("Buildings");
+        }
         else if (SelectedPart.Value.Tags.Contains("layer_wall"))
         {
             tileMap = GetNode<TileMapLayer>("Walls");
