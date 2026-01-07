@@ -31,7 +31,12 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     public Graph<GridFixture> FixtureGraph { get; } = new();
 
     // IEntity
-    public List<T> GetComponents<T>() where T : class
+    public List<T> GetComponents<T>() where T : class, IComponent
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryGetComponent<T>(out T component) where T : class, IComponent
     {
         throw new NotImplementedException();
     }

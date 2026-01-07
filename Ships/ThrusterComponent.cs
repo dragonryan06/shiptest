@@ -9,6 +9,6 @@ public partial class ThrusterComponent : AnimatedSprite2D, IComponent
 {
     public T GetEntity<T>() where T : class
     {
-        throw new System.NotImplementedException();
+        return GetParentOrNull<T>() ?? throw new EcsException($"Component {nameof(ThrusterComponent)} has no parent Entity!");
     }
 }

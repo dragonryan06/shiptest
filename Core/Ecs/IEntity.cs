@@ -6,8 +6,13 @@ namespace ShipTest.Core.Ecs;
 public interface IEntity
 {
     /// <summary>
-    /// Get all attached components to this Entity as the type T
-    /// (in most cases T will probably have to be IComponent).
+    /// Get all attached components to this Entity as the type T.
     /// </summary>
-    public List<T> GetComponents<T>() where T : class;
+    public List<T> GetComponents<T>() where T : class, IComponent;
+
+    /// <summary>
+    /// Try to get a specific component from this Entity, should
+    /// be more performant than searching through GetComponents()
+    /// </summary>
+    public bool TryGetComponent<T>(out T component) where T : class, IComponent;
 }
