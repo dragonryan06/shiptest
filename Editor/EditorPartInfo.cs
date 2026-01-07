@@ -18,6 +18,12 @@ public struct EditorPartInfo
         {
             Icon = new AtlasTexture { Atlas = Icon, Region = new Rect2(0, 0, 32, 32)};
             SourceId = godotDict["source_id"].AsInt32();
+
+            if (Tags.Contains("entity"))
+            {
+                return;
+            }
+            
             if (Tags.Contains("can_rotate"))
             {
                 var orientations = godotDict["orientations"].AsGodotArray();

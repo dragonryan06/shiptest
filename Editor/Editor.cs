@@ -137,13 +137,23 @@ public partial class Editor : Node2D
             preview.SetCell(preview.LocalToMap(preview.GetLocalMousePosition()), 0, Vector2I.Zero);
             return;
         }
-        
-        preview.SetCell(
-            preview.LocalToMap(preview.GetLocalMousePosition()),
-            SelectedPart.Value.SourceId,
-            SelectedPart.Value.Tags.Contains("can_rotate")
-                ? SelectedPart.Value.Orientations[RotationIdx]
-                : SelectedPart.Value.AtlasPosition);
+
+        if (SelectedPart.Value.Tags.Contains("entity"))
+        {
+            preview.SetCell(
+                preview.LocalToMap(preview.GetLocalMousePosition()),
+                SelectedPart.Value.SourceId,
+                Vector2I.Zero);
+        }
+        else
+        {
+            preview.SetCell(
+                preview.LocalToMap(preview.GetLocalMousePosition()),
+                SelectedPart.Value.SourceId,
+                SelectedPart.Value.Tags.Contains("can_rotate")
+                    ? SelectedPart.Value.Orientations[RotationIdx]
+                    : SelectedPart.Value.AtlasPosition);
+        }
         
         if (SelectedPart.Value.Terrain != -1)
         {

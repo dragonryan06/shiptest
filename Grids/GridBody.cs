@@ -22,6 +22,7 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
     public static readonly Dictionary<string, string> LayerTileSets = new()
     {
         { nameof(LayerNames.Floor), "res://Resources/Tilesets/floor.tres" },
+        { nameof(LayerNames.Buildings), "res://Resources/Tilesets/buildings.tres" },
         { nameof(LayerNames.Walls), "res://Resources/Tilesets/walls.tres" }
     };
 
@@ -337,5 +338,6 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 public enum LayerNames
 {
     Floor,
+    Buildings,
     Walls
 }
