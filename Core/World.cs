@@ -45,7 +45,9 @@ public partial class World : Node2D
 
     private void OnDebugSpawning(string fileName)
     {
-        if (!SerializationService.ReadObjectFromFile<ShipBlueprint>(fileName, out var blueprint))
+        var blueprint = ResourceLoader.Load<ShipBlueprint>(fileName);
+        
+        if (blueprint == null)
         {
             GD.PrintErr("Failed to debug spawn!");
             return;

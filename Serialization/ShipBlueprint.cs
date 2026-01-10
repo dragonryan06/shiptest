@@ -1,18 +1,20 @@
-using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using ShipTest.Grids;
 
 namespace ShipTest.Serialization;
 
-public class ShipBlueprint
+public partial class ShipBlueprint : Resource
 {
+    [Export]
     public string Name { get; set; }
     
-    public Dictionary<string, byte[]> GridLayers { get; set; }
+    [Export]
+    public Godot.Collections.Dictionary<string, byte[]> GridLayers { get; set; }
     
     // Unfortunately there's no way to encode information we store on scene tiles into the tilemap data
-    public Dictionary<Vector2I, float> TileEntityRotations { get; set; }
+    [Export]
+    public Godot.Collections.Dictionary<Vector2I, float> TileEntityRotations { get; set; }
 
     public GridBody ToGridBody()
     {

@@ -280,8 +280,8 @@ public partial class Editor : Node2D
         Blueprint = new ShipBlueprint
         {
             Name = "Unnamed Ship",
-            GridLayers = new Dictionary<string, byte[]>(),
-            TileEntityRotations = new Dictionary<Vector2I, float>()
+            GridLayers = new Godot.Collections.Dictionary<string, byte[]>(),
+            TileEntityRotations = new Godot.Collections.Dictionary<Vector2I, float>()
         };
         foreach (var layer in Enum.GetNames(typeof(LayerNames)))
         {
@@ -336,7 +336,9 @@ public partial class Editor : Node2D
     
     private void OnFileOpen(string fileName)
     {
-        if (SerializationService.ReadObjectFromFile<ShipBlueprint>(fileName, out var blueprint))
+        var blueprint = ResourceLoader.Load<ShipBlueprint>(fileName);
+        
+        if (blueprint != null)
         {
             Blueprint = blueprint;
             foreach (var layer in blueprint.GridLayers)
@@ -362,9 +364,10 @@ public partial class Editor : Node2D
             Blueprint.GridLayers[layer] = node.TileMapData;
         }
 
-        if (!SerializationService.WriteObjectToFile(fileName, Blueprint))
+        var error = ResourceSaver.Save(Blueprint, fileName);
+        if (error != Error.Ok)
         {
-            GD.PrintErr($"Failed to save file '{fileName}'!");
+            GD.PrintErr($"Failed to save file '{fileName}'! {error.ToString()}");
         }
     }
 
