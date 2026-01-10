@@ -26,6 +26,7 @@ public partial class ShipBlueprint : Resource
         foreach (var tileMap in GridLayers.Select(layer => new TileMapLayer
                  {
                      Name = layer.Key,
+                     ZIndex = GridBody.LayerZIndicies[layer.Key],
                      TileSet = GD.Load<TileSet>(GridBody.LayerTileSets[layer.Key]),
                      TileMapData = layer.Value
                  }))

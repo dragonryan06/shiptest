@@ -26,6 +26,13 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         { nameof(LayerNames.Walls), "res://Resources/Tilesets/walls.tres" }
     };
 
+    public static readonly Dictionary<string, int> LayerZIndicies = new()
+    {
+        { nameof(LayerNames.Floor), 0 },
+        { nameof(LayerNames.Buildings), 1 },
+        { nameof(LayerNames.Walls), 2 }
+    };
+
     public Dictionary<Vector2I, GridChunk> Chunks { get; } = new();
 
     public Graph<GridFixture> FixtureGraph { get; } = new();
