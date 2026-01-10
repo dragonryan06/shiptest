@@ -280,7 +280,8 @@ public partial class Editor : Node2D
         Blueprint = new ShipBlueprint
         {
             Name = "Unnamed Ship",
-            GridLayers = new Dictionary<string, byte[]>()
+            GridLayers = new Dictionary<string, byte[]>(),
+            TileEntityRotations = new Dictionary<Vector2I, float>()
         };
         foreach (var layer in Enum.GetNames(typeof(LayerNames)))
         {
@@ -375,5 +376,11 @@ public partial class Editor : Node2D
         }
 
         entity.Rotation = float.Tau * RotationIdx / 4;
+
+        if (child.GetParent().Name != "Preview")
+        {
+            Blueprint.TileEntityRotations.Remove(entity.TilePosition);
+            Blueprint.TileEntityRotations.Add(entity.TilePosition, entity.Rotation);
+        }
     }
 }
