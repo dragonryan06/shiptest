@@ -5,6 +5,10 @@
 [ext_resource type="Script" uid="uid://cy85crfn8qun" path="res://Ships/ThrusterComponent.cs" id="3_370j0"]
 [ext_resource type="Texture2D" uid="uid://brecwp7u42i7w" path="res://Resources/Textures/Tiles/thrust_fire.png" id="3_lo4rg"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_v8i08"]
+atlas = ExtResource("2_370j0")
+region = Rect2(64, 0, 32, 32)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_lo4rg"]
 atlas = ExtResource("2_370j0")
 region = Rect2(0, 0, 32, 32)
@@ -29,12 +33,16 @@ region = Rect2(32, 0, 32, 32)
 atlas = ExtResource("2_370j0")
 region = Rect2(0, 0, 32, 32)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_v8i08"]
-atlas = ExtResource("2_370j0")
-region = Rect2(64, 0, 32, 32)
-
 [sub_resource type="SpriteFrames" id="SpriteFrames_5dj07"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v8i08")
+}],
+"loop": true,
+"name": &"disabled",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_lo4rg")
@@ -55,15 +63,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_d0xmo")
 }],
 "loop": true,
-"name": &"activated",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_v8i08")
-}],
-"loop": true,
-"name": &"disabled",
+"name": &"enabled",
 "speed": 5.0
 }]
 
@@ -123,11 +123,11 @@ metadata/_custom_type_script = "uid://c1r2qq2uwjbgh"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_5dj07")
-animation = &"activated"
-autoplay = "activated"
-frame_progress = 0.871953
+animation = &"disabled"
+autoplay = "enabled"
 
 [node name="ThrusterComponent" type="AnimatedSprite2D" parent="."]
+visible = false
 position = Vector2(0, 32)
 sprite_frames = SubResource("SpriteFrames_370j0")
 autoplay = "default"
