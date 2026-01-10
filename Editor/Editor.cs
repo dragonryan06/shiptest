@@ -114,6 +114,13 @@ public partial class Editor : Node2D
         hud.Connect("new_file", new Callable(this, MethodName.OnFileNew));
         hud.Connect("open_file", new Callable(this, MethodName.OnFileOpen));
         hud.Connect("save_file", new Callable(this, MethodName.OnFileSave));
+
+        GetNode<TileMapLayer>("Floor").ChildEnteredTree += OnNewMapChild;
+        GetNode<TileMapLayer>("Floor/Preview").ChildEnteredTree += OnNewMapChild;
+        GetNode<TileMapLayer>("Buildings").ChildEnteredTree += OnNewMapChild;
+        GetNode<TileMapLayer>("Buildings/Preview").ChildEnteredTree += OnNewMapChild;
+        GetNode<TileMapLayer>("Walls").ChildEnteredTree += OnNewMapChild;
+        GetNode<TileMapLayer>("Walls/Preview").ChildEnteredTree += OnNewMapChild;
     }
 
     public override void _Process(double delta)
@@ -358,5 +365,15 @@ public partial class Editor : Node2D
         {
             GD.PrintErr($"Failed to save file '{fileName}'!");
         }
+    }
+
+    private void OnNewMapChild(Node child)
+    {
+        if (child is not TileEntity entity || !CanRotate)
+        {
+            return;
+        }
+
+        entity.Rotation = float.Tau * RotationIdx / 4;
     }
 }
