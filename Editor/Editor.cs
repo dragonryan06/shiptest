@@ -224,7 +224,7 @@ public partial class Editor : Node2D
 
                         if (ActiveMap.Name == "Walls")
                         {
-                            GetNode<TileMapLayer>("Floor").SetCell(cell,UnderWallSourceId,Vector2I.Zero);
+                            GetNode<TileMapLayer>("WorkingDocument/Floor").SetCell(cell,UnderWallSourceId,Vector2I.Zero);
                         }
                     }
                 }
@@ -254,19 +254,20 @@ public partial class Editor : Node2D
         TileMapLayer tileMap = null;
         if (SelectedPart.Value.Tags.Contains("layer_floor"))
         {
-            tileMap = GetNode<TileMapLayer>("Floor");
+            tileMap = GetNode<TileMapLayer>("WorkingDocument/Floor");
         } 
-        else if (SelectedPart.Value.Tags.Contains("layer_buildings"))
+        else if (SelectedPart.Value.Tags.Contains("layer_floor_entities"))
         {
-            tileMap = GetNode<TileMapLayer>("Buildings");
+            tileMap = GetNode<TileMapLayer>("WorkingDocument/FloorEntities");
         }
         else if (SelectedPart.Value.Tags.Contains("layer_wall"))
         {
-            tileMap = GetNode<TileMapLayer>("Walls");
+            tileMap = GetNode<TileMapLayer>("WorkingDocument/Walls");
         }
         Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
 
         ActiveMap = tileMap;
+        GetNode<TileMapLayer>("PlacePreview").TileSet = tileMap.TileSet;
     }
 
     private void NewDocument()

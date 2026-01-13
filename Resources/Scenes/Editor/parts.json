@@ -80,7 +80,7 @@
 		"tags" : [
 			"tile",
 			"entity",
-			"layer_buildings",
+			"layer_floor_entities",
 			"can_rotate"
 		]
 	},

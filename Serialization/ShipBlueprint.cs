@@ -6,7 +6,7 @@ using ShipTest.Grids;
 namespace ShipTest.Serialization;
 
 [GlobalClass]
-public partial class ShipBlueprint : Node
+public partial class ShipBlueprint : Node2D
 {
     [Export]
     public string ShipName { get; set; }
@@ -23,6 +23,7 @@ public partial class ShipBlueprint : Node
         foreach (var child in GetChildren())
         {
             child.Owner = this;
+            child.ChildEnteredTree += OnLayerChildEnteredTree;
         }
     }
     
@@ -68,6 +69,11 @@ public partial class ShipBlueprint : Node
         body.Ready += () => BodyReadyCallback(body);
 
         return body;
+    }
+
+    private void OnLayerChildEnteredTree(Node child)
+    {
+        child.Owner = this;
     }
 
     private void BodyReadyCallback(GridBody body)

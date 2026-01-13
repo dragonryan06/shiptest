@@ -120,7 +120,7 @@ script = ExtResource("1_jlxre")
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("2_sp4rm")
 
-[node name="WorkingDocument" type="Node" parent="."]
+[node name="WorkingDocument" type="Node2D" parent="."]
 script = ExtResource("3_e4pe8")
 metadata/_custom_type_script = "uid://cl2y1fpbytu6e"
 
