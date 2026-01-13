@@ -105,7 +105,7 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			get_viewport().add_child(file_dialog)
 			file_dialog.access = FileDialog.ACCESS_FILESYSTEM
 			file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
-			file_dialog.add_filter("*.tres", "TRES files")
+			file_dialog.add_filter("*.tscn", "TSCN files")
 			file_dialog.current_path = ProjectSettings.globalize_path("user://")
 			file_dialog.canceled.connect(file_dialog.queue_free)
 			file_dialog.popup_centered()
@@ -128,7 +128,7 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			get_viewport().add_child(file_dialog)
 			file_dialog.access = FileDialog.ACCESS_FILESYSTEM
 			file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
-			file_dialog.add_filter("*.tres", "TRES files")
+			file_dialog.add_filter("*.tscn", "TSCN files")
 			file_dialog.current_path = ProjectSettings.globalize_path("user://")
 			file_dialog.canceled.connect(file_dialog.queue_free)
 			file_dialog.popup_centered()

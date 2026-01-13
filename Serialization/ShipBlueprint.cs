@@ -1,13 +1,15 @@
+using System;
 using System.Linq;
 using Godot;
 using ShipTest.Grids;
 
 namespace ShipTest.Serialization;
 
-public partial class ShipBlueprint : Resource
+[GlobalClass]
+public partial class ShipBlueprint : Node
 {
     [Export]
-    public string Name { get; set; }
+    public string ShipName { get; set; }
     
     [Export]
     public Godot.Collections.Dictionary<string, byte[]> GridLayers { get; set; }
@@ -16,6 +18,34 @@ public partial class ShipBlueprint : Resource
     [Export]
     public Godot.Collections.Dictionary<Vector2I, float> TileEntityRotations { get; set; }
 
+    public override void _Ready()
+    {
+        foreach (var child in GetChildren())
+        {
+            child.Owner = this;
+        }
+    }
+    
+    public void Clear()
+    {
+        ShipName = "Unnamed Ship";
+        
+        foreach (var child in GetChildren())
+        {
+            if (child is not TileMapLayer tileMap)
+            {
+                continue;
+            }
+            
+            tileMap.Clear();
+        
+            foreach (var entity in tileMap.GetChildren())
+            {
+                entity.QueueFree();
+            }
+        }
+    }
+    
     public GridBody ToGridBody()
     {
         var body = new GridBody
