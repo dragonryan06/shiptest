@@ -317,25 +317,25 @@ public partial class Editor : Node2D
     
     private void OnFileOpen(string fileName)
     {
-        throw new NotImplementedException();
-        // var blueprint = ResourceLoader.Load<ShipBlueprint>(fileName);
-        //
-        // if (blueprint != null)
-        // {
-        //     Blueprint = blueprint;
-        //     foreach (var layer in blueprint.GridLayers)
-        //     {
-        //         GetNode<TileMapLayer>(layer.Key).TileMapData = layer.Value;
-        //         
-        //     }
-        //     
-        //     // Yes this is lazy and might cause issues with the GDScript "MVVM" thing I'm trying here... shhh.....
-        //     GetNode<LineEdit>("HUD/NameBox").Text = blueprint.Name;
-        // }
-        // else
-        // {
-        //     GD.PrintErr($"Failed to load file '{fileName}'!");
-        // }
+        var scene = ResourceLoader.Load<PackedScene>(fileName);
+
+        if (scene == null)
+        {
+            GD.PrintErr($"Failed to load file '{fileName}'!");
+            return;
+        }
+
+        var oldScene = GetNode<ShipBlueprint>("WorkingDocument");
+        RemoveChild(oldScene);
+
+        var newScene = scene.Instantiate<ShipBlueprint>();
+        newScene.Name = "WorkingDocument";
+        AddChild(newScene);
+        MoveChild(newScene, 0);
+
+        oldScene.QueueFree();
+        
+        // Todo emit some signal telling stuff like the name lineedit there's a new model.
     }
 
     private void OnFileSave(string fileName)

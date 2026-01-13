@@ -117,9 +117,6 @@ events = [SubResource("InputEventKey_jlxre")]
 [node name="Editor" type="Node2D"]
 script = ExtResource("1_jlxre")
 
-[node name="Camera2D" type="Camera2D" parent="."]
-script = ExtResource("2_sp4rm")
-
 [node name="WorkingDocument" type="Node2D" parent="."]
 script = ExtResource("3_e4pe8")
 metadata/_custom_type_script = "uid://cl2y1fpbytu6e"
@@ -139,6 +136,9 @@ modulate = Color(0, 1, 0, 1)
 [node name="DeletePreview" type="TileMapLayer" parent="."]
 modulate = Color(1, 0, 0, 1)
 tile_set = SubResource("TileSet_ofvp3")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("2_sp4rm")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("4_sp4rm")
