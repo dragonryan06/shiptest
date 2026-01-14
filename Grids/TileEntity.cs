@@ -7,9 +7,7 @@ namespace ShipTest.Grids;
 [GlobalClass]
 public partial class TileEntity : Node2D, IEntity
 {
-    private const int TileSize = 32;
-    
-    public Vector2I TilePosition { get; private set; }
+    public Vector2I TilePosition { get; set; }
     
     public List<T> GetComponents<T>() where T : class, IComponent
     {
@@ -32,10 +30,5 @@ public partial class TileEntity : Node2D, IEntity
         }
 
         return found;
-    }
-
-    public override void _Ready()
-    {
-        TilePosition = (Vector2I)((Position - new Vector2(TileSize/2.0f, TileSize/2.0f)) / TileSize);
     }
 }

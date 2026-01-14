@@ -18,7 +18,8 @@ public partial class Editor : Node2D
     private readonly Color _deletingColor = new("#ff0000");
     private readonly List<EditorPartInfo> _parts;
     
-    private bool GridSnapping { get; set; }
+    // If we aren't placing a tile, we are placing an entity.
+    private bool PlacingTile { get; set; }
     private bool CanRotate { get; set; }
     private int RotationIdx { get; set; }
     private bool Dragging { get; set; }
@@ -47,7 +48,10 @@ public partial class Editor : Node2D
         }
     }
     
+    // ActiveMap previews using the preview maps, while ActiveEntity is its own preview (using Modulate)
     private TileMapLayer ActiveMap { get; set; }
+    
+    private TileEntity ActiveEntity { get; set; }
 
     private EditorPartInfo? _selectedPart;
     
@@ -58,6 +62,7 @@ public partial class Editor : Node2D
         {
             _selectedPart = value;
             UpdateActiveMap();
+            UpdateActiveEntity();
         }
     }
 
@@ -113,8 +118,6 @@ public partial class Editor : Node2D
         hud.Connect("new_file", new Callable(this, MethodName.OnFileNew));
         hud.Connect("open_file", new Callable(this, MethodName.OnFileOpen));
         hud.Connect("save_file", new Callable(this, MethodName.OnFileSave));
-        
-        GetNode<TileMapLayer>("WorkingDocument/FloorEntities").ChildEnteredTree += OnNewMapChild;
     }
 
     public override void _Process(double delta)
@@ -141,21 +144,27 @@ public partial class Editor : Node2D
 
         if (SelectedPart.Value.Tags.Contains("entity"))
         {
-            placePreview.SetCell(
-                placePreview.LocalToMap(placePreview.GetLocalMousePosition()),
-                SelectedPart.Value.SourceId,
-                Vector2I.Zero);
+            var floor = GetNode<TileMapLayer>("WorkingDocument/Floor");
+            ActiveEntity.TilePosition = floor.LocalToMap(GetLocalMousePosition());
+            ActiveEntity.Position = floor.MapToLocal(ActiveEntity.TilePosition);
+            
+            if (SelectedPart.Value.Tags.Contains("snap_floor"))
+            {
+                ActiveEntity.Modulate = floor.GetCellSourceId(ActiveEntity.TilePosition) != -1
+                    ? _placingColor
+                    : _deletingColor;
+            }
+
+            return;
         }
-        else
-        {
-            placePreview.SetCell(
-                placePreview.LocalToMap(placePreview.GetLocalMousePosition()),
-                SelectedPart.Value.SourceId,
-                SelectedPart.Value.Tags.Contains("can_rotate")
-                    ? SelectedPart.Value.Orientations[RotationIdx]
-                    : SelectedPart.Value.AtlasPosition);
-        }
-        
+
+        placePreview.SetCell(
+            placePreview.LocalToMap(placePreview.GetLocalMousePosition()),
+            SelectedPart.Value.SourceId,
+            SelectedPart.Value.Tags.Contains("can_rotate")
+                ? SelectedPart.Value.Orientations[RotationIdx]
+                : SelectedPart.Value.AtlasPosition);
+
         if (SelectedPart.Value.Terrain != -1)
         {
             placePreview.SetCellsTerrainConnect(placePreview.GetUsedCells(), SelectedPart.Value.Terrain, 0);
@@ -171,7 +180,10 @@ public partial class Editor : Node2D
                 RotationIdx = 0;
             }
 
-            // Insert logic for non-tile parts
+            if (ActiveEntity != null)
+            {
+                ActiveEntity.Rotation = float.Tau * RotationIdx / 4.0f;
+            }
         }
     }
 
@@ -255,10 +267,6 @@ public partial class Editor : Node2D
         if (SelectedPart.Value.Tags.Contains("layer_floor"))
         {
             tileMap = GetNode<TileMapLayer>("WorkingDocument/Floor");
-        } 
-        else if (SelectedPart.Value.Tags.Contains("layer_floor_entities"))
-        {
-            tileMap = GetNode<TileMapLayer>("WorkingDocument/FloorEntities");
         }
         else if (SelectedPart.Value.Tags.Contains("layer_wall"))
         {
@@ -270,6 +278,28 @@ public partial class Editor : Node2D
         GetNode<TileMapLayer>("PlacePreview").TileSet = tileMap.TileSet;
     }
 
+    private void UpdateActiveEntity()
+    {
+        if (SelectedPart == null || !SelectedPart.Value.Tags.Contains("entity"))
+        {
+            ActiveEntity?.QueueFree();
+            ActiveEntity = null;
+            return;
+        }
+
+        ActiveEntity = GD.Load<PackedScene>(SelectedPart.Value.ScenePath).Instantiate<TileEntity>();
+        ActiveEntity.Modulate = _placingColor;
+
+        if (SelectedPart.Value.Tags.Contains("snap_floor"))
+        {
+            GetNode<TileMapLayer>("WorkingDocument/Floor").AddChild(ActiveEntity);
+        }
+        else
+        {
+            GetNode<ShipBlueprint>("WorkingDocument").AddChild(ActiveEntity);
+        }
+    }
+
     private void NewDocument()
     {
         GetNode<ShipBlueprint>("WorkingDocument").Clear();
@@ -277,7 +307,6 @@ public partial class Editor : Node2D
 
     private void OnSelectionChanged(int partId)
     {
-        GridSnapping = false;
         CanRotate = false;
         RotationIdx = 0;
 
@@ -296,11 +325,6 @@ public partial class Editor : Node2D
         }
 
         SelectedPart = _parts[partId];
-
-        if (SelectedPart.Value.Tags.Contains("tile"))
-        {
-            GridSnapping = true;
-        }
 
         if (SelectedPart.Value.Tags.Contains("can_rotate"))
         {
@@ -355,15 +379,5 @@ public partial class Editor : Node2D
         {
             GD.PrintErr($"Failed saving WorkingDocument PackedScene to file '{fileName}'! {saveResult.ToString()}");
         }
-    }
-
-    private void OnNewMapChild(Node child)
-    {
-        if (child is not TileEntity entity || !CanRotate)
-        {
-            return;
-        }
-
-        entity.Rotation = float.Tau * RotationIdx / 4;
     }
 }

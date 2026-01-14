@@ -49,6 +49,10 @@ public struct EditorPartInfo
                 Terrain = 0;
             }
         }
+        else
+        {
+            ScenePath = godotDict["scene"].AsString();
+        }
     }
 
     // All Parts
@@ -69,4 +73,7 @@ public struct EditorPartInfo
     
     /// Will be empty if this isn't tagged can_rotate.
     public List<Vector2I> Orientations { get; } = [];
+    
+    // Entities only
+    public string ScenePath { get; } = "";
 }
