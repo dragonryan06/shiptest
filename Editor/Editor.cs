@@ -20,8 +20,27 @@ public partial class Editor : Node2D
     
     // If we aren't placing a tile, we are placing an entity.
     private bool PlacingTile { get; set; }
+
+    private bool _validPosition;
+    private bool ValidPosition
+    {
+        get => _validPosition;
+        set
+        {
+            _validPosition = value;
+            if (ActiveEntity != null)
+            {
+                ActiveEntity.Modulate = value
+                    ? _placingColor
+                    : _deletingColor;
+            }
+        }
+    }
+    
     private bool CanRotate { get; set; }
+    
     private int RotationIdx { get; set; }
+    
     private bool Dragging { get; set; }
 
     private bool _deleting;
@@ -53,6 +72,8 @@ public partial class Editor : Node2D
     
     private TileEntity ActiveEntity { get; set; }
 
+    private PackedScene ActiveEntityScene { get; set; }
+    
     private EditorPartInfo? _selectedPart;
     
     private EditorPartInfo? SelectedPart
@@ -148,12 +169,7 @@ public partial class Editor : Node2D
             ActiveEntity.TilePosition = floor.LocalToMap(GetLocalMousePosition());
             ActiveEntity.Position = floor.MapToLocal(ActiveEntity.TilePosition);
             
-            if (SelectedPart.Value.Tags.Contains("snap_floor"))
-            {
-                ActiveEntity.Modulate = floor.GetCellSourceId(ActiveEntity.TilePosition) != -1
-                    ? _placingColor
-                    : _deletingColor;
-            }
+            ValidatePosition();
 
             return;
         }
@@ -193,7 +209,7 @@ public partial class Editor : Node2D
         {
             Deleting = mouseButton.ButtonIndex == MouseButton.Right;
 
-            if (!Deleting && SelectedPart == null)
+            if (SelectedPart == null)
             {
                 return;
             }
@@ -206,52 +222,101 @@ public partial class Editor : Node2D
             {
                 Dragging = false;
 
-                var preview = Deleting
-                        ? GetNode<TileMapLayer>("DeletePreview")
-                        : GetNode<TileMapLayer>("PlacePreview");
-                if (preview.TileMapData.IsEmpty() || SelectedPart == null)
+                if (SelectedPart.Value.Tags.Contains("tile"))
                 {
-                    return;
+                    PlaceOrDeleteTiles();
+                }
+                else if (SelectedPart.Value.Tags.Contains("entity"))
+                {
+                    PlaceOrDeleteEntities();
                 }
                 
-                // I would love to eventually have a like fly-in and then weld on animation here!
-                foreach (var cell in preview.GetUsedCells())
-                {
-                    if (Deleting)
-                    {
-                        if (SelectedPart.Value.Terrain != -1)
-                        {
-                            ActiveMap.SetCellsTerrainConnect([cell], SelectedPart.Value.Terrain, -1);
-                            continue;
-                        }
-                        
-                        ActiveMap.EraseCell(cell);
-                    }
-                    else
-                    {
-                        ActiveMap.SetCell(cell, 
-                            preview.GetCellSourceId(cell), 
-                            preview.GetCellAtlasCoords(cell), 
-                            preview.GetCellAlternativeTile(cell));
-
-                        if (ActiveMap.Name == "Walls")
-                        {
-                            GetNode<TileMapLayer>("WorkingDocument/Floor").SetCell(cell,UnderWallSourceId,Vector2I.Zero);
-                        }
-                    }
-                }
-                
-                if (SelectedPart.Value.Terrain != -1)
-                {
-                    ActiveMap.SetCellsTerrainConnect(ActiveMap.GetUsedCells(), SelectedPart.Value.Terrain, 0);
-                }
-                preview.Clear();
-
                 if (Deleting)
                 {
                     Deleting = false;
                 }
             }
+        }
+        return;
+
+        void PlaceOrDeleteTiles()
+        {
+            var preview = Deleting
+                ? GetNode<TileMapLayer>("DeletePreview")
+                : GetNode<TileMapLayer>("PlacePreview");
+            if (preview.TileMapData.IsEmpty() || SelectedPart == null)
+            {
+                return;
+            }
+                
+            // I would love to eventually have a like fly-in and then weld on animation here!
+            foreach (var cell in preview.GetUsedCells())
+            {
+                if (Deleting)
+                {
+                    if (SelectedPart.Value.Terrain != -1)
+                    {
+                        ActiveMap.SetCellsTerrainConnect([cell], SelectedPart.Value.Terrain, -1);
+                        continue;
+                    }
+                        
+                    ActiveMap.EraseCell(cell);
+                }
+                else
+                {
+                    ActiveMap.SetCell(cell, 
+                        preview.GetCellSourceId(cell), 
+                        preview.GetCellAtlasCoords(cell), 
+                        preview.GetCellAlternativeTile(cell));
+
+                    if (ActiveMap.Name == "Walls")
+                    {
+                        GetNode<TileMapLayer>("WorkingDocument/Floor").SetCell(cell,UnderWallSourceId,Vector2I.Zero);
+                    }
+                }
+            }
+                
+            if (SelectedPart.Value.Terrain != -1)
+            {
+                ActiveMap.SetCellsTerrainConnect(ActiveMap.GetUsedCells(), SelectedPart.Value.Terrain, 0);
+            }
+            preview.Clear();
+        }
+
+        void PlaceOrDeleteEntities()
+        {
+            if (ActiveEntity == null)
+            {
+                return;
+            }
+
+            if (Deleting)
+            {
+                // This is obviously not general enough but I'm just doing a quick solution cause idk what exactly will be needed.
+                foreach (var child in GetNode<TileMapLayer>("WorkingDocument/Floor").GetChildren())
+                {
+                    if (child is not TileEntity entity || ReferenceEquals(child, ActiveEntity))
+                    {
+                        continue;
+                    }
+
+                    if (GetNode<TileMapLayer>("DeletePreview").GetUsedCells().Contains(entity.TilePosition))
+                    {
+                        entity.QueueFree();
+                    }
+                }
+
+                return;
+            }
+
+            ValidatePosition();
+            if (!ValidPosition)
+            {
+                return;
+            }
+            
+            ActiveEntity.Modulate = Colors.White;
+            NewActiveEntity();
         }
     }
     
@@ -287,8 +352,20 @@ public partial class Editor : Node2D
             return;
         }
 
-        ActiveEntity = GD.Load<PackedScene>(SelectedPart.Value.ScenePath).Instantiate<TileEntity>();
+        ActiveEntityScene = GD.Load<PackedScene>(SelectedPart.Value.ScenePath);
+        NewActiveEntity();
+    }
+
+    private void NewActiveEntity()
+    {
+        if (SelectedPart == null)
+        {
+            return;
+        }
+        
+        ActiveEntity = ActiveEntityScene.Instantiate<TileEntity>();
         ActiveEntity.Modulate = _placingColor;
+        ActiveEntity.Rotation = RotationIdx * float.Tau / 4.0f;
 
         if (SelectedPart.Value.Tags.Contains("snap_floor"))
         {
@@ -303,6 +380,43 @@ public partial class Editor : Node2D
     private void NewDocument()
     {
         GetNode<ShipBlueprint>("WorkingDocument").Clear();
+    }
+
+    private void ValidatePosition()
+    {
+        if (SelectedPart == null)
+        {
+            return;
+        }
+
+        if (GetNode<TileMapLayer>("WorkingDocument/Walls").GetCellSourceId(ActiveEntity.TilePosition) != -1)
+        {
+            ValidPosition = false;
+            return;
+        }
+
+        if (SelectedPart.Value.Tags.Contains("snap_floor") && GetNode<TileMapLayer>("WorkingDocument/Floor").GetCellSourceId(ActiveEntity.TilePosition) == -1)
+        {
+            ValidPosition = false;
+            return;
+        }
+        
+        // This is obviously not general enough but I'm just doing a quick solution cause idk what exactly will be needed.
+        foreach (var child in GetNode<TileMapLayer>("WorkingDocument/Floor").GetChildren())
+        {
+            if (child is not TileEntity entity || ReferenceEquals(child, ActiveEntity))
+            {
+                continue;
+            }
+
+            if (entity.TilePosition == ActiveEntity.TilePosition)
+            {
+                ValidPosition = false;
+                return;
+            }
+        }
+
+        ValidPosition = true;
     }
 
     private void OnSelectionChanged(int partId)

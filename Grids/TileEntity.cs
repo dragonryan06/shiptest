@@ -7,6 +7,7 @@ namespace ShipTest.Grids;
 [GlobalClass]
 public partial class TileEntity : Node2D, IEntity
 {
+    [Export]
     public Vector2I TilePosition { get; set; }
     
     public List<T> GetComponents<T>() where T : class, IComponent
