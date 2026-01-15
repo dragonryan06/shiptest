@@ -10,13 +10,6 @@ public partial class ShipBlueprint : Node2D
 {
     [Export]
     public string ShipName { get; set; }
-    
-    [Export]
-    public Godot.Collections.Dictionary<string, byte[]> GridLayers { get; set; }
-    
-    // Unfortunately there's no way to encode information we store on scene tiles into the tilemap data
-    [Export]
-    public Godot.Collections.Dictionary<Vector2I, float> TileEntityRotations { get; set; }
 
     public override void _Ready()
     {
@@ -54,18 +47,10 @@ public partial class ShipBlueprint : Node2D
             Name = Name
         };
 
-        foreach (var tileMap in GridLayers.Select(layer => new TileMapLayer
-                 {
-                     Name = layer.Key,
-                     TileSet = GD.Load<TileSet>(GridBody.LayerTileSets[layer.Key]),
-                     TileMapData = layer.Value
-                 }))
+        foreach (var child in GetChildren())
         {
-            body.AddChild(tileMap);
+            body.AddChild(child.Duplicate());
         }
-
-        // Possible memory leak here idk how best to do this callback tbh...
-        body.Ready += () => BodyReadyCallback(body);
 
         return body;
     }
@@ -73,21 +58,5 @@ public partial class ShipBlueprint : Node2D
     private void OnLayerChildEnteredTree(Node child)
     {
         child.Owner = this;
-    }
-
-    private void BodyReadyCallback(GridBody body)
-    {
-        foreach (var layerName in GridLayers.Select(layer => layer.Key))
-        {
-            foreach (var child in body.GetNode<TileMapLayer>(layerName).GetChildren())
-            {
-                if (child is not TileEntity entity)
-                {
-                    continue;
-                }
-
-                entity.Rotation = TileEntityRotations[entity.TilePosition];
-            }
-        }
     }
 }

@@ -45,11 +45,19 @@ public partial class World : Node2D
 
     private void OnDebugSpawning(string fileName)
     {
-        var blueprint = ResourceLoader.Load<ShipBlueprint>(fileName);
+        var scene = ResourceLoader.Load<PackedScene>(fileName);
         
+        if (scene == null)
+        {
+            GD.PrintErr("Failed to load PackedScene while debug spawning!");
+            return;
+        }
+
+        var blueprint = scene.Instantiate<ShipBlueprint>();
+
         if (blueprint == null)
         {
-            GD.PrintErr("Failed to debug spawn!");
+            GD.PrintErr("Failed to instantiate loaded scene as ShipBlueprint while debug spawning!");
             return;
         }
         
