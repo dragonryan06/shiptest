@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
@@ -86,6 +85,9 @@ public partial class Editor : Node2D
             UpdateActiveEntity();
         }
     }
+
+    [Signal]
+    public delegate void WorkingDocumentChangedEventHandler();
 
     public Editor()
     { 
@@ -473,7 +475,7 @@ public partial class Editor : Node2D
 
         oldScene.QueueFree();
         
-        // Todo emit some signal telling stuff like the name lineedit there's a new model.
+        EmitSignalWorkingDocumentChanged();
     }
 
     private void OnFileSave(string fileName)

@@ -517,6 +517,7 @@ expand_to_text_length = true
 [node name="PauseMenu" parent="HUD" instance=ExtResource("7_ofvp3")]
 visible = false
 
+[connection signal="WorkingDocumentChanged" from="." to="HUD" method="_on_editor_working_document_changed"]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button" to="HUD" method="_on_hotbar_button_pressed" binds= [0]]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button2" to="HUD" method="_on_hotbar_button_pressed" binds= [1]]
 [connection signal="pressed" from="HUD/Hotbar/HBoxContainer/Button3" to="HUD" method="_on_hotbar_button_pressed" binds= [2]]

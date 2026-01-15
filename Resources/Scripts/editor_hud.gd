@@ -138,3 +138,8 @@ func _on_filemenu_id_pressed(id: int) -> void:
 			file_dialog.queue_free()
 			last_filename = filename
 			save_file.emit(filename)
+
+
+func _on_editor_working_document_changed() -> void:
+	var new_document = get_parent().get_node("WorkingDocument") as ShipBlueprint
+	$NameBox.text = new_document.ShipName
