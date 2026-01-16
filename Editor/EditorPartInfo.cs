@@ -18,6 +18,12 @@ public struct EditorPartInfo
         {
             Icon = new AtlasTexture { Atlas = Icon, Region = new Rect2(0, 0, 32, 32)};
             SourceId = godotDict["source_id"].AsInt32();
+
+            if (Tags.Contains("entity"))
+            {
+                return;
+            }
+            
             if (Tags.Contains("can_rotate"))
             {
                 var orientations = godotDict["orientations"].AsGodotArray();
@@ -43,6 +49,10 @@ public struct EditorPartInfo
                 Terrain = 0;
             }
         }
+        else
+        {
+            ScenePath = godotDict["scene"].AsString();
+        }
     }
 
     // All Parts
@@ -63,4 +73,7 @@ public struct EditorPartInfo
     
     /// Will be empty if this isn't tagged can_rotate.
     public List<Vector2I> Orientations { get; } = [];
+    
+    // Entities only
+    public string ScenePath { get; } = "";
 }

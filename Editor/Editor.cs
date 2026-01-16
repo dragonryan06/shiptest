@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Godot;
@@ -18,9 +17,29 @@ public partial class Editor : Node2D
     private readonly Color _deletingColor = new("#ff0000");
     private readonly List<EditorPartInfo> _parts;
     
-    private bool GridSnapping { get; set; }
+    // If we aren't placing a tile, we are placing an entity.
+    private bool PlacingTile { get; set; }
+
+    private bool _validPosition;
+    private bool ValidPosition
+    {
+        get => _validPosition;
+        set
+        {
+            _validPosition = value;
+            if (ActiveEntity != null)
+            {
+                ActiveEntity.Modulate = value
+                    ? _placingColor
+                    : _deletingColor;
+            }
+        }
+    }
+    
     private bool CanRotate { get; set; }
+    
     private int RotationIdx { get; set; }
+    
     private bool Dragging { get; set; }
 
     private bool _deleting;
@@ -33,12 +52,12 @@ public partial class Editor : Node2D
 
             if (_deleting)
             {
-                if (WorkingMap == null)
+                if (ActiveMap == null)
                 {
                     return;
                 }
                 
-                WorkingMap.GetNode<TileMapLayer>("Preview").Clear();
+                GetNode<TileMapLayer>("PlacePreview").Clear();
             }
             else
             {
@@ -47,20 +66,28 @@ public partial class Editor : Node2D
         }
     }
     
-    private TileMapLayer WorkingMap { get; set; }
+    // ActiveMap previews using the preview maps, while ActiveEntity is its own preview (using Modulate)
+    private TileMapLayer ActiveMap { get; set; }
+    
+    private TileEntity ActiveEntity { get; set; }
 
+    private PackedScene ActiveEntityScene { get; set; }
+    
     private EditorPartInfo? _selectedPart;
+    
     private EditorPartInfo? SelectedPart
     {
         get => _selectedPart;
         set
         {
             _selectedPart = value;
-            UpdateWorkingMap();
+            UpdateActiveMap();
+            UpdateActiveEntity();
         }
     }
-    
-    public ShipBlueprint Blueprint { get; set; }
+
+    [Signal]
+    public delegate void WorkingDocumentChangedEventHandler();
 
     public Editor()
     { 
@@ -123,31 +150,42 @@ public partial class Editor : Node2D
             return;
         }
 
-        var preview = Deleting
-                ? GetNode<TileMapLayer>("DeletePreview")
-                : WorkingMap.GetNode<TileMapLayer>("Preview");
-        
+        var placePreview = GetNode<TileMapLayer>("PlacePreview");
+        var deletePreview = GetNode<TileMapLayer>("DeletePreview");
+
         if (!Dragging)
         {
-            preview.Clear();
-        }
-
-        if (Deleting)
-        {
-            preview.SetCell(preview.LocalToMap(preview.GetLocalMousePosition()), 0, Vector2I.Zero);
-            return;
+            deletePreview.Clear();
+            placePreview.Clear();
         }
         
-        preview.SetCell(
-            preview.LocalToMap(preview.GetLocalMousePosition()),
+        if (Deleting)
+        {
+            deletePreview.SetCell(deletePreview.LocalToMap(deletePreview.GetLocalMousePosition()), 0, Vector2I.Zero);
+            return;
+        }
+
+        if (SelectedPart.Value.Tags.Contains("entity"))
+        {
+            var floor = GetNode<TileMapLayer>("WorkingDocument/Floor");
+            ActiveEntity.TilePosition = floor.LocalToMap(GetLocalMousePosition());
+            ActiveEntity.Position = floor.MapToLocal(ActiveEntity.TilePosition);
+            
+            ValidatePosition();
+
+            return;
+        }
+
+        placePreview.SetCell(
+            placePreview.LocalToMap(placePreview.GetLocalMousePosition()),
             SelectedPart.Value.SourceId,
             SelectedPart.Value.Tags.Contains("can_rotate")
                 ? SelectedPart.Value.Orientations[RotationIdx]
                 : SelectedPart.Value.AtlasPosition);
-        
+
         if (SelectedPart.Value.Terrain != -1)
         {
-            preview.SetCellsTerrainConnect(preview.GetUsedCells(), SelectedPart.Value.Terrain, 0);
+            placePreview.SetCellsTerrainConnect(placePreview.GetUsedCells(), SelectedPart.Value.Terrain, 0);
         }
     }
 
@@ -160,7 +198,10 @@ public partial class Editor : Node2D
                 RotationIdx = 0;
             }
 
-            // Insert logic for non-tile parts
+            if (ActiveEntity != null)
+            {
+                ActiveEntity.Rotation = float.Tau * RotationIdx / 4.0f;
+            }
         }
     }
 
@@ -170,7 +211,7 @@ public partial class Editor : Node2D
         {
             Deleting = mouseButton.ButtonIndex == MouseButton.Right;
 
-            if (!Deleting && SelectedPart == null)
+            if (SelectedPart == null)
             {
                 return;
             }
@@ -183,95 +224,205 @@ public partial class Editor : Node2D
             {
                 Dragging = false;
 
-                var preview = Deleting
-                        ? GetNode<TileMapLayer>("DeletePreview")
-                        : WorkingMap.GetNode<TileMapLayer>("Preview");
-                if (preview.TileMapData.IsEmpty() || SelectedPart == null)
+                if (SelectedPart.Value.Tags.Contains("tile"))
                 {
-                    return;
+                    PlaceOrDeleteTiles();
+                }
+                else if (SelectedPart.Value.Tags.Contains("entity"))
+                {
+                    PlaceOrDeleteEntities();
                 }
                 
-                // I would love to eventually have a like fly-in and then weld on animation here!
-                foreach (var cell in preview.GetUsedCells())
-                {
-                    if (Deleting)
-                    {
-                        if (SelectedPart.Value.Terrain != -1)
-                        {
-                            WorkingMap.SetCellsTerrainConnect([cell], SelectedPart.Value.Terrain, -1);
-                            continue;
-                        }
-                        
-                        WorkingMap.EraseCell(cell);
-                    }
-                    else
-                    {
-                        WorkingMap.SetCell(cell, 
-                            preview.GetCellSourceId(cell), 
-                            preview.GetCellAtlasCoords(cell), 
-                            preview.GetCellAlternativeTile(cell));
-
-                        if (WorkingMap.Name == "Walls")
-                        {
-                            GetNode<TileMapLayer>("Floor").SetCell(cell,UnderWallSourceId,Vector2I.Zero);
-                        }
-                    }
-                }
-                
-                if (SelectedPart.Value.Terrain != -1)
-                {
-                    WorkingMap.SetCellsTerrainConnect(WorkingMap.GetUsedCells(), SelectedPart.Value.Terrain, 0);
-                }
-                preview.Clear();
-
                 if (Deleting)
                 {
                     Deleting = false;
                 }
             }
         }
+        return;
+
+        void PlaceOrDeleteTiles()
+        {
+            var preview = Deleting
+                ? GetNode<TileMapLayer>("DeletePreview")
+                : GetNode<TileMapLayer>("PlacePreview");
+            if (preview.TileMapData.IsEmpty() || SelectedPart == null)
+            {
+                return;
+            }
+                
+            // I would love to eventually have a like fly-in and then weld on animation here!
+            foreach (var cell in preview.GetUsedCells())
+            {
+                if (Deleting)
+                {
+                    if (SelectedPart.Value.Terrain != -1)
+                    {
+                        ActiveMap.SetCellsTerrainConnect([cell], SelectedPart.Value.Terrain, -1);
+                        continue;
+                    }
+                        
+                    ActiveMap.EraseCell(cell);
+                }
+                else
+                {
+                    ActiveMap.SetCell(cell, 
+                        preview.GetCellSourceId(cell), 
+                        preview.GetCellAtlasCoords(cell), 
+                        preview.GetCellAlternativeTile(cell));
+
+                    if (ActiveMap.Name == "Walls")
+                    {
+                        GetNode<TileMapLayer>("WorkingDocument/Floor").SetCell(cell,UnderWallSourceId,Vector2I.Zero);
+                    }
+                }
+            }
+                
+            if (SelectedPart.Value.Terrain != -1)
+            {
+                ActiveMap.SetCellsTerrainConnect(ActiveMap.GetUsedCells(), SelectedPart.Value.Terrain, 0);
+            }
+            preview.Clear();
+        }
+
+        void PlaceOrDeleteEntities()
+        {
+            if (ActiveEntity == null)
+            {
+                return;
+            }
+
+            if (Deleting)
+            {
+                // This is obviously not general enough but I'm just doing a quick solution cause idk what exactly will be needed.
+                foreach (var child in GetNode<TileMapLayer>("WorkingDocument/Floor").GetChildren())
+                {
+                    if (child is not TileEntity entity || ReferenceEquals(child, ActiveEntity))
+                    {
+                        continue;
+                    }
+
+                    if (GetNode<TileMapLayer>("DeletePreview").GetUsedCells().Contains(entity.TilePosition))
+                    {
+                        entity.QueueFree();
+                    }
+                }
+
+                return;
+            }
+
+            ValidatePosition();
+            if (!ValidPosition)
+            {
+                return;
+            }
+            
+            ActiveEntity.Modulate = Colors.White;
+            NewActiveEntity();
+        }
     }
     
-    private void UpdateWorkingMap()
+    private void UpdateActiveMap()
     {
         if (SelectedPart == null || !SelectedPart.Value.Tags.Contains("tile"))
         {
-            WorkingMap = null;
+            ActiveMap = null;
             return;
         }
         
         TileMapLayer tileMap = null;
         if (SelectedPart.Value.Tags.Contains("layer_floor"))
         {
-            tileMap = GetNode<TileMapLayer>("Floor");
-        } 
+            tileMap = GetNode<TileMapLayer>("WorkingDocument/Floor");
+        }
         else if (SelectedPart.Value.Tags.Contains("layer_wall"))
         {
-            tileMap = GetNode<TileMapLayer>("Walls");
+            tileMap = GetNode<TileMapLayer>("WorkingDocument/Walls");
         }
         Debug.Assert(tileMap != null, "Selected tile lacks a layer tag!?!?");
 
-        WorkingMap = tileMap;
+        ActiveMap = tileMap;
+        GetNode<TileMapLayer>("PlacePreview").TileSet = tileMap.TileSet;
+    }
+
+    private void UpdateActiveEntity()
+    {
+        if (SelectedPart == null || !SelectedPart.Value.Tags.Contains("entity"))
+        {
+            ActiveEntity?.QueueFree();
+            ActiveEntity = null;
+            return;
+        }
+
+        ActiveEntityScene = GD.Load<PackedScene>(SelectedPart.Value.ScenePath);
+        NewActiveEntity();
+    }
+
+    private void NewActiveEntity()
+    {
+        if (SelectedPart == null)
+        {
+            return;
+        }
+        
+        ActiveEntity = ActiveEntityScene.Instantiate<TileEntity>();
+        ActiveEntity.Modulate = _placingColor;
+        ActiveEntity.Rotation = RotationIdx * float.Tau / 4.0f;
+
+        if (SelectedPart.Value.Tags.Contains("snap_floor"))
+        {
+            GetNode<TileMapLayer>("WorkingDocument/Floor").AddChild(ActiveEntity);
+        }
+        else
+        {
+            GetNode<ShipBlueprint>("WorkingDocument").AddChild(ActiveEntity);
+        }
     }
 
     private void NewDocument()
     {
-        Blueprint = new ShipBlueprint
+        GetNode<ShipBlueprint>("WorkingDocument").Clear();
+    }
+
+    private void ValidatePosition()
+    {
+        if (SelectedPart == null)
         {
-            Name = "Unnamed Ship",
-            GridLayers = new Dictionary<string, byte[]>()
-        };
-        foreach (var layer in Enum.GetNames(typeof(LayerNames)))
-        {
-            var node = GetNode<TileMapLayer>(layer);
-            node.Clear();
-            Blueprint.GridLayers[layer] = node.TileMapData;
+            return;
         }
+
+        if (GetNode<TileMapLayer>("WorkingDocument/Walls").GetCellSourceId(ActiveEntity.TilePosition) != -1)
+        {
+            ValidPosition = false;
+            return;
+        }
+
+        if (SelectedPart.Value.Tags.Contains("snap_floor") && GetNode<TileMapLayer>("WorkingDocument/Floor").GetCellSourceId(ActiveEntity.TilePosition) == -1)
+        {
+            ValidPosition = false;
+            return;
+        }
+        
+        // This is obviously not general enough but I'm just doing a quick solution cause idk what exactly will be needed.
+        foreach (var child in GetNode<TileMapLayer>("WorkingDocument/Floor").GetChildren())
+        {
+            if (child is not TileEntity entity || ReferenceEquals(child, ActiveEntity))
+            {
+                continue;
+            }
+
+            if (entity.TilePosition == ActiveEntity.TilePosition)
+            {
+                ValidPosition = false;
+                return;
+            }
+        }
+
+        ValidPosition = true;
     }
 
     private void OnSelectionChanged(int partId)
     {
-        GridSnapping = false;
         CanRotate = false;
         RotationIdx = 0;
 
@@ -279,7 +430,7 @@ public partial class Editor : Node2D
         {
             var preview = Deleting
                 ? GetNode<TileMapLayer>("DeletePreview")
-                : WorkingMap.GetNode<TileMapLayer>("Preview");
+                : GetNode<TileMapLayer>("PlacePreview");
             preview.Clear();
         }
         
@@ -291,11 +442,6 @@ public partial class Editor : Node2D
 
         SelectedPart = _parts[partId];
 
-        if (SelectedPart.Value.Tags.Contains("tile"))
-        {
-            GridSnapping = true;
-        }
-
         if (SelectedPart.Value.Tags.Contains("can_rotate"))
         {
             CanRotate = true;
@@ -304,45 +450,50 @@ public partial class Editor : Node2D
 
     private void OnNameChanged(string newName)
     {
-        Blueprint.Name = newName;
+        GetNode<ShipBlueprint>("WorkingDocument").ShipName = newName;
     }
 
-    private void OnFileNew()
-    {
-        NewDocument();
-    }
+    private void OnFileNew() => NewDocument();
     
     private void OnFileOpen(string fileName)
     {
-        if (SerializationService.ReadObjectFromFile<ShipBlueprint>(fileName, out var blueprint))
-        {
-            Blueprint = blueprint;
-            foreach (var layer in blueprint.GridLayers)
-            {
-                GetNode<TileMapLayer>(layer.Key).TileMapData = layer.Value;
-                
-            }
-            
-            // Yes this is lazy and might cause issues with the GDScript "MVVM" thing I'm trying here... shhh.....
-            GetNode<LineEdit>("HUD/NameBox").Text = blueprint.Name;
-        }
-        else
+        var scene = ResourceLoader.Load<PackedScene>(fileName);
+
+        if (scene == null)
         {
             GD.PrintErr($"Failed to load file '{fileName}'!");
+            return;
         }
+
+        var oldScene = GetNode<ShipBlueprint>("WorkingDocument");
+        RemoveChild(oldScene);
+
+        var newScene = scene.Instantiate<ShipBlueprint>();
+        newScene.Name = "WorkingDocument";
+        AddChild(newScene);
+        MoveChild(newScene, 0);
+
+        oldScene.QueueFree();
+        
+        EmitSignalWorkingDocumentChanged();
     }
 
     private void OnFileSave(string fileName)
     {
-        foreach (var layer in Enum.GetNames(typeof(LayerNames)))
+        var scene = new PackedScene();
+        var packResult = scene.Pack(GetNode<ShipBlueprint>("WorkingDocument"));
+
+        if (packResult != Error.Ok)
         {
-            var node = GetNode<TileMapLayer>(layer);
-            Blueprint.GridLayers[layer] = node.TileMapData;
+            GD.PrintErr($"Failed packing WorkingDocument to scene! {packResult.ToString()}");
+            return;
         }
 
-        if (!SerializationService.WriteObjectToFile(fileName, Blueprint))
+        var saveResult = ResourceSaver.Save(scene, fileName);
+
+        if (saveResult != Error.Ok)
         {
-            GD.PrintErr($"Failed to save file '{fileName}'!");
+            GD.PrintErr($"Failed saving WorkingDocument PackedScene to file '{fileName}'! {saveResult.ToString()}");
         }
     }
 }

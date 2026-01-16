@@ -73,6 +73,18 @@
 	},
 	
 	{
+		"id" : 5,
+		"name" : "Thruster",
+		"icon" : "res://Resources/Textures/Tiles/thruster.png",
+		"scene" : "res://Resources/Scenes/Entities/thruster_tile.tscn",
+		"tags" : [
+			"entity",
+			"snap_floor",
+			"can_rotate"
+		]
+	},
+	
+	{
 		"id" : -1,
 		"name" : "Reinforced Wall",
 		"icon" : "res://Resources/Textures/Tiles/r_wall.png",
