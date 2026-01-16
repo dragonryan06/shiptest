@@ -52,6 +52,13 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         else if (floor.GetCellSourceId(cell) != -1)
         {
             floor.EraseCell(cell);
+
+            if (!TileEntityLookup.Remove(cell, out var tileEntity))
+            {
+                return;
+            }
+
+            tileEntity.QueueFree();
         }
         else
         {
