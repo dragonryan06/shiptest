@@ -44,7 +44,7 @@ public partial class ShipBlueprint : Node2D
     {
         var body = new GridBody
         {
-            Name = Name
+            Name = ShipName
         };
 
         foreach (var child in GetChildren())

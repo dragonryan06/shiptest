@@ -19,15 +19,11 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
 
     private bool _mouseHover;
 
-    public static readonly Dictionary<string, string> LayerTileSets = new()
-    {
-        { nameof(LayerNames.Floor), "res://Resources/Tilesets/floor.tres" },
-        { nameof(LayerNames.Walls), "res://Resources/Tilesets/walls.tres" }
-    };
-
     public Dictionary<Vector2I, GridChunk> Chunks { get; } = new();
 
     public Graph<GridFixture> FixtureGraph { get; } = new();
+
+    public Dictionary<Vector2I, TileEntity> TileEntityLookup { get; } = new();
 
     // IEntity
     public List<T> GetComponents<T>() where T : class, IComponent
@@ -75,6 +71,16 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
         }
 
         InputPickable = true;
+
+        foreach (var child in GetNode<TileMapLayer>("Floor").GetChildren())
+        {
+            if (child is not TileEntity tileEntity)
+            {
+                continue;
+            }
+
+            TileEntityLookup[tileEntity.TilePosition] = tileEntity;
+        }
 
         InitializeChunks();
         
@@ -290,10 +296,16 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                     LinearVelocity = LinearVelocity,
                     AngularVelocity = AngularVelocity,
                 };
-                var newFloor = (TileMapLayer)oldFloor.Duplicate();
-                newFloor.Clear();
-                var newWalls = (TileMapLayer)oldWalls.Duplicate();
-                newWalls.Clear();
+                var newFloor = new TileMapLayer
+                {
+                    Name = "Floor",
+                    TileSet = oldFloor.TileSet
+                };
+                var newWalls = new TileMapLayer
+                {
+                    Name = "Walls",
+                    TileSet = oldWalls.TileSet
+                };
 
                 foreach (var fixture in comp)
                 {
@@ -315,6 +327,15 @@ public partial class GridBody : RigidBody2D, IEntity, IDestructible
                         
                         oldFloor.EraseCell(cell);
                         oldWalls.EraseCell(cell);
+
+                        if (!TileEntityLookup.TryGetValue(cell, out var tileEntity))
+                        {
+                            continue;
+                        }
+                        
+                        // For now TileEntities can only be anchored to the floor.
+                        GetNode<TileMapLayer>("Floor").RemoveChild(tileEntity);
+                        newFloor.AddChild(tileEntity);
                     }
                 }
 
